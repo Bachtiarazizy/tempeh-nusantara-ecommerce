@@ -1,0 +1,553 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+// ============================================
+// ENUM DEFINITIONS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  AFFILIATE
+  BUYER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  COD
+  EWALLET
+  CREDIT_CARD
+}
+
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+
+enum NotificationType {
+  ORDER_CREATED
+  ORDER_PAID
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  COMMISSION_EARNED
+  COMMISSION_PAID
+  AFFILIATE_APPROVED
+}
+
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+enum MaterialType {
+  BANNER
+  PRODUCT_PHOTO
+  COPYWRITING
+  VIDEO
+  GUIDELINE
+}
+
+enum MaterialStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  password      String
+  name          String
+  phone         String?
+  role          UserRole    @default(BUYER)
+  status        UserStatus  @default(ACTIVE)
+  emailVerified Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  affiliate     Affiliate?
+  orders        Order[]
+  addresses     Address[]
+  cart          Cart?
+  wishlist      Wishlist?
+  notifications Notification[]
+  materialDownloads MaterialDownload[]
+
+  @@index([email])
+  @@index([role, status])
+  @@map("users")
+}
+
+// ============================================
+// AFFILIATE SYSTEM
+// ============================================
+
+model Affiliate {
+  id                String      @id @default(cuid())
+  userId            String      @unique
+  status            UserStatus  @default(PENDING)
+  referralCode      String      @unique
+  commissionRate    Decimal     @default(5.0)
+  monthlyGoal       Int         @default(10)
+  totalClicks       Int         @default(0)
+  totalOrders       Int         @default(0)
+  totalSales        Decimal     @default(0)
+  totalCommission   Decimal     @default(0)
+  paidCommission    Decimal     @default(0)
+  pendingCommission Decimal     @default(0)
+  rank              Int?
+  joinedAt          DateTime    @default(now())
+  approvedAt        DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Bank Info
+  bankName        String?
+  accountNumber   String?
+  accountName     String?
+
+  // Relations
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders          Order[]
+  clicks          AffiliateClick[]
+  commissions     Commission[]
+  payouts         Payout[]
+  materialDownloads MaterialDownload[]
+
+  @@index([referralCode])
+  @@index([rank])
+  @@index([status]) 
+  @@index([totalOrders])
+  @@map("affiliates")
+}
+
+model AffiliateClick {
+  id          String    @id @default(cuid())
+  affiliateId String
+  ipAddress   String?
+  userAgent   String?
+  referer     String?
+  clickedAt   DateTime  @default(now())
+
+  // Relations
+  affiliate   Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId, clickedAt])
+  @@map("affiliate_clicks")
+}
+
+// ============================================
+// PRODUCT MANAGEMENT
+// ============================================
+
+model Product {
+  id            String        @id @default(cuid())
+  sku           String        @unique
+  name          String
+  slug          String        @unique
+  description   String?       @db.Text
+  price         Decimal
+  comparePrice  Decimal?
+  stock         Int           @default(0)
+  weight        Float?
+  status        ProductStatus @default(ACTIVE)
+  category      String
+  images        String[]
+  featured      Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  orderItems    OrderItem[]
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
+
+  @@index([status, featured])
+  @@index([category, status])
+  @@index([slug])
+  @@map("products")
+}
+
+// ============================================
+// CART MANAGEMENT
+// ============================================
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id          String   @id @default(cuid())
+  cartId      String
+  productId   String
+  productSku  String
+  quantity    Int      @default(1)
+  productName String
+  price       Decimal
+  image       String?
+  variant     String?
+  weight      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cart        Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId, variant, weight])
+  @@index([cartId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+// ============================================
+// WISHLIST MANAGEMENT
+// ============================================
+
+model Wishlist {
+  id        String         @id @default(cuid())
+  userId    String         @unique
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     WishlistItem[]
+
+  @@map("wishlists")
+}
+
+model WishlistItem {
+  id          String    @id @default(cuid())
+  wishlistId  String
+  productId   String
+  productSku  String
+  productName String
+  price       Decimal
+  image       String?
+  createdAt   DateTime  @default(now())
+
+  wishlist    Wishlist  @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId])
+  @@index([wishlistId])
+  @@index([productId])
+  @@map("wishlist_items")
+}
+
+// ============================================
+// ORDER MANAGEMENT
+// ============================================
+
+model Order {
+  id                String        @id @default(cuid())
+  orderNumber       String        @unique
+  userId            String
+  affiliateId       String?
+  status            OrderStatus   @default(PENDING)
+  paymentStatus     PaymentStatus @default(UNPAID)
+  paymentMethod     PaymentMethod
+  subtotal          Decimal
+  shippingCost      Decimal
+  discount          Decimal       @default(0)
+  total             Decimal
+  affiliateCommission Decimal     @default(0)
+  commissionPaid    Boolean       @default(false)
+  shippingName      String
+  shippingPhone     String
+  shippingAddress   String        @db.Text
+  shippingCity      String
+  shippingProvince  String
+  shippingPostalCode String
+  trackingNumber    String?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  paymentProof      String?
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  affiliate   Affiliate? @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+  items       OrderItem[]
+  commission  Commission?
+
+  @@index([userId])
+  @@index([affiliateId])
+  @@index([status])
+  @@index([orderNumber])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productId   String
+  productName String
+  productSku  String
+  price       Decimal
+  quantity    Int
+  subtotal    Decimal
+  createdAt   DateTime @default(now())
+
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// ============================================
+// COMMISSION & PAYOUT MANAGEMENT
+// ============================================
+
+model Commission {
+  id              String           @id @default(cuid())
+  affiliateId     String
+  orderId         String           @unique
+  amount          Decimal
+  status          CommissionStatus @default(PENDING)
+  approvedAt      DateTime?
+  paidAt          DateTime?
+  paidAmount      Decimal?
+  paymentNote     String?
+  rejectedReason  String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  affiliate       Affiliate        @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  order           Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId, status])
+  @@index([status])
+  @@map("commissions")
+}
+
+model Payout {
+  id             String   @id @default(cuid())
+  affiliateId    String
+  amount         Decimal
+  status         String   @default("PENDING")
+  requestedAt    DateTime @default(now())
+  paidAt         DateTime?
+  referenceCode  String?
+  note           String?
+
+  affiliate Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId, status])
+  @@map("payouts")
+}
+
+// ============================================
+// ADDRESS MANAGEMENT
+// ============================================
+
+model Address {
+  id          String   @id @default(cuid())
+  userId      String
+  label       String
+  name        String
+  phone       String
+  address     String   @db.Text
+  city        String
+  province    String
+  postalCode  String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isDefault])
+  @@map("addresses")
+}
+
+// ============================================
+// SETTINGS MANAGEMENT
+// ============================================
+
+model Setting {
+  id          String       @id @default(cuid())
+  key         String       @unique
+  value       String       @db.Text
+  type        SettingType  @default(STRING)
+  description String?
+  updatedAt   DateTime     @updatedAt
+
+  @@map("settings")
+}
+
+// ============================================
+// BLOG / CMS (REFERENCE)
+// ============================================
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  sanityId    String   @unique
+  slug        String   @unique
+  title       String
+  published   Boolean  @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published])
+  @@map("blog_posts")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String           @db.Text
+  data        Json?
+  read        Boolean          @default(false)
+  delivered   Boolean          @default(false)
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model MarketingMaterial {
+  id          String         @id @default(cuid())
+  type        MaterialType
+  status      MaterialStatus @default(ACTIVE)
+  
+  // Basic Info
+  title       String
+  slug        String         @unique
+  description String?
+  category    String?        // e.g., "Social Media", "Email", "WhatsApp"
+  
+  // File Info
+  fileUrl     String?
+  thumbnailUrl String?
+  fileSize    Int?           // in bytes
+  fileFormat  String?        // JPG, PNG, MP4, PDF, etc
+  
+  // Dimensions (for images/videos)
+  width       Int?
+  height      Int?
+  duration    Int?           // in seconds for videos
+  
+  // Content (for copywriting)
+  content     String?        @db.Text
+  
+  // Additional metadata
+  tags        String[]       @default([])
+  sortOrder   Int            @default(0)
+  
+  // Stats
+  downloadCount Int          @default(0)
+  viewCount     Int          @default(0)
+  
+  // Tracking
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  publishedAt DateTime?
+  
+  // Relations
+  downloads   MaterialDownload[]
+  
+  @@index([type, status])
+  @@index([slug])
+  @@index([publishedAt])
+  @@map("marketing_materials")
+}
+
+model MaterialDownload {
+  id          String            @id @default(cuid())
+  materialId  String
+  userId      String
+  affiliateId String?
+  
+  ipAddress   String?
+  userAgent   String?
+  
+  downloadedAt DateTime         @default(now())
+  
+  // Relations
+  material    MarketingMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  affiliate   Affiliate?        @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+  
+  @@index([materialId])
+  @@index([userId])
+  @@index([affiliateId])
+  @@index([downloadedAt])
+  @@map("material_downloads")
+}
