@@ -108,15 +108,15 @@ export default function BuyerProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-orange-50 to-amber-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-500 border-t-transparent"></div>
+      <div className="min-h-screenflex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 py-4">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Pengaturan Akun</h1>
@@ -128,7 +128,7 @@ export default function BuyerProfilePage() {
           <div className="lg:col-span-1">
             <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden sticky top-6">
               {/* Profile Header */}
-              <div className="p-6 bg-primary/5 border-b border-border">
+              <div className="p-6 border-b border-border">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
                     <User className="w-8 h-8 text-primary-foreground" />
@@ -141,14 +141,14 @@ export default function BuyerProfilePage() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-3 mt-6">
-                  <div className="bg-card rounded-lg p-3 border border-border">
+                  <div className="bg-muted/50 rounded-lg p-3 border border-border">
                     <div className="flex items-center gap-2 mb-1">
                       <ShoppingBag className="w-4 h-4 text-primary" />
                       <span className="text-xs text-muted-foreground">Pesanan</span>
                     </div>
                     <p className="text-xl font-bold text-foreground">{profile.stats.totalOrders}</p>
                   </div>
-                  <div className="bg-card rounded-lg p-3 border border-border">
+                  <div className="bg-muted/50 rounded-lg p-3 border border-border">
                     <div className="flex items-center gap-2 mb-1">
                       <Wallet className="w-4 h-4 text-primary" />
                       <span className="text-xs text-muted-foreground">Belanja</span>

@@ -26,7 +26,7 @@ export default function BuyerLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted/50">
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       <div className="lg:ml-64 min-h-screen flex flex-col">

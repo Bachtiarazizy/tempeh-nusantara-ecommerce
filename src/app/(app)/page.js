@@ -79,7 +79,7 @@ const LandingPage = () => {
       <section
         className="relative bg-primary text-secondary overflow-hidden"
         style={{
-          backgroundImage: 'linear-linear(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)), url("/images/hero-image.png")',
+          backgroundImage: 'bg-linear(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)), url("/images/hero-image.png")',
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",

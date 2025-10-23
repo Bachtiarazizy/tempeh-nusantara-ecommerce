@@ -1,7 +1,7 @@
 // app/api/products/[slug]/route.js
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 // GET - Detail produk by slug
 export async function GET(request, { params }) {

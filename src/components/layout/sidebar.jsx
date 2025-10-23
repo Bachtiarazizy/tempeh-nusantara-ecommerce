@@ -23,12 +23,12 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
     });
   };
 
-  // Show loading state
+  // Loading state
   if (status === "loading") {
     return (
-      <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-50">
+      <aside className="fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border z-50">
         <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-sidebar-primary border-t-transparent"></div>
         </div>
       </aside>
     );
@@ -39,67 +39,74 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
 
   return (
     <>
-      {/* Mobile backdrop */}
-      {isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setIsOpen(false)} />}
+      {/* Mobile backdrop with blur */}
+      {isOpen && <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity" onClick={() => setIsOpen(false)} aria-hidden="true" />}
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-50 transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}>
-        {/* Logo & Brand */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+      <aside
+        className={`fixed left-0 top-0 h-full w-64 bg-card border-r border-sidebar-border z-50 
+          transform transition-transform duration-300 ease-in-out shadow-lg lg:shadow-none
+          ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo & Brand */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-sidebar-border">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-linear-to-br from-sidebar-primary to-sidebar-primary/80 rounded-lg flex items-center justify-center shadow-sm">
+                <svg className="w-5 h-5 text-sidebar-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <span className="font-bold text-sidebar-foreground text-base">Tempe Nusantara</span>
             </div>
-            <span className="font-bold text-primary">Tempe Nusantara</span>
+            <button onClick={() => setIsOpen(false)} className="lg:hidden p-1.5 hover:bg-sidebar-accent rounded-md transition-colors" aria-label="Close sidebar">
+              <Icon name="x" className="w-5 h-5 text-sidebar-foreground" />
+            </button>
           </div>
-          <button onClick={() => setIsOpen(false)} className="lg:hidden p-1 hover:bg-gray-100 rounded">
-            <Icon name="x" className="w-5 h-5" />
-          </button>
-        </div>
 
-        {/* User Info */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="text-sm text-gray-600 mb-2">
-            <p>Welcome back,</p>
-            <p className="font-medium text-primary text-base">{user.name}</p>
-            <p className="text-xs text-gray-500 mt-1">{user.email}</p>
+          {/* Navigation Menu */}
+          <nav className="flex-1 px-3 py-4 overflow-y-auto">
+            <ul className="space-y-1">
+              {menuItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => {
+                        router.push(item.href);
+                        setIsOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg 
+                        transition-all duration-200 text-sm font-medium group
+                        ${isActive ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}
+                    >
+                      <Icon
+                        name={item.icon}
+                        className={`w-5 h-5 transition-transform duration-200 
+                          ${isActive ? "" : "group-hover:scale-110"}`}
+                      />
+                      <span className="flex-1">{item.label}</span>
+                      {isActive && <div className="w-1.5 h-1.5 bg-sidebar-primary-foreground rounded-full"></div>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* Logout Button */}
+          <div className="p-4 border-t border-sidebar-border bg-sidebar">
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="w-full justify-start gap-2 text-destructive hover:bg-destructive/10 
+                hover:text-destructive border-border/50 hover:border-destructive/30 
+                transition-all duration-200 group"
+            >
+              <Icon name="log-out" className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
+              <span className="font-medium">Logout</span>
+            </Button>
           </div>
-          <Badge variant="secondary" className="mt-2 text-xs">
-            {user.role}
-          </Badge>
-        </div>
-
-        {/* Navigation Menu */}
-        <nav className="px-4 py-4 flex-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 280px)" }}>
-          <ul className="space-y-2">
-            {menuItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <li key={item.id}>
-                  <button
-                    onClick={() => {
-                      router.push(item.href);
-                      setIsOpen(false);
-                    }}
-                    className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors ${isActive ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100"}`}
-                  >
-                    <Icon name={item.icon} className="w-5 h-5 mr-3" />
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* Logout Button */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
-          <Button onClick={handleLogout} variant="outline" className="w-full text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200">
-            <Icon name="log-out" className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
         </div>
       </aside>
     </>
