@@ -11,66 +11,26 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Search, X, SlidersHorizontal, Grid3x3, List, Star, Package, Layers, TrendingUp, Tag, Filter } from "lucide-react";
+import { Search, X, SlidersHorizontal, Grid3x3, List, Star, Package, Layers } from "lucide-react";
 import { toast } from "sonner";
 
-function ProductsPageContent() {
+function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  // Get URL parameters
-  const categoryParam = searchParams.get("category") || "all";
-  const sortParam = searchParams.get("sort") || "relevance";
-  const filterParam = searchParams.get("filter") || "";
-
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [products, setProducts] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
-  const [hasError, setHasError] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState(categoryParam);
 
   const [filters, setFilters] = useState({
-    categories: categoryParam !== "all" ? [categoryParam] : [],
+    categories: [],
     priceRange: [0, 500000],
-    sortBy: sortParam,
+    sortBy: searchParams.get("sort") || "relevance",
     inStock: false,
     rating: 0,
-    onSale: filterParam === "on-sale",
   });
-
-  // Category definitions matching mega menu
-  const categoryDefinitions = {
-    premium: {
-      id: "premium",
-      name: "Tempe Premium Export",
-      description: "Tempe berkualitas export dengan standar internasional",
-      badge: "Export",
-      icon: Layers,
-    },
-    organic: {
-      id: "organic",
-      name: "Tempe Organik",
-      description: "Tempe organik dari kedelai organik bersertifikat",
-      badge: "Organic",
-      icon: Layers,
-    },
-    traditional: {
-      id: "traditional",
-      name: "Tempe Tradisional",
-      description: "Tempe autentik dengan resep tradisional Indonesia",
-      icon: Layers,
-    },
-    bulk: {
-      id: "bulk",
-      name: "Paket Bulk Order",
-      description: "Paket hemat untuk pembelian dalam jumlah besar",
-      badge: "Hemat",
-      icon: Package,
-    },
-  };
 
   const categories = [
     { id: "premium", name: "Tempe Premium", count: 24, icon: Layers },
@@ -82,7 +42,6 @@ function ProductsPageContent() {
   const sortOptions = [
     { value: "relevance", label: "Paling Relevan" },
     { value: "popular", label: "Paling Populer" },
-    { value: "best-sellers", label: "Best Sellers" },
     { value: "newest", label: "Terbaru" },
     { value: "price-low", label: "Harga: Rendah ke Tinggi" },
     { value: "price-high", label: "Harga: Tinggi ke Rendah" },
@@ -93,7 +52,6 @@ function ProductsPageContent() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-
       if (searchQuery) params.append("q", searchQuery);
       if (filters.sortBy) params.append("sort", filters.sortBy);
       if (filters.categories.length > 0) params.append("categories", filters.categories.join(","));
@@ -101,9 +59,8 @@ function ProductsPageContent() {
       params.append("maxPrice", filters.priceRange[1].toString());
       if (filters.inStock) params.append("inStock", "true");
       if (filters.rating > 0) params.append("minRating", filters.rating.toString());
-      if (filters.onSale) params.append("onSale", "true");
 
-      const response = await fetch(`/api/products?${params}`);
+      const response = await fetch(`/api/products/search?${params}`);
       const result = await response.json();
 
       if (result.success) {
@@ -124,21 +81,6 @@ function ProductsPageContent() {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Update filters when URL params change
-  useEffect(() => {
-    const newCategory = searchParams.get("category") || "all";
-    const newSort = searchParams.get("sort") || "relevance";
-    const newFilter = searchParams.get("filter") || "";
-
-    setCurrentCategory(newCategory);
-    setFilters((prev) => ({
-      ...prev,
-      categories: newCategory !== "all" ? [newCategory] : prev.categories,
-      sortBy: newSort,
-      onSale: newFilter === "on-sale",
-    }));
-  }, [searchParams]);
-
   const handleCategoryToggle = (categoryId) => {
     setFilters((prev) => ({
       ...prev,
@@ -153,10 +95,7 @@ function ProductsPageContent() {
       sortBy: "relevance",
       inStock: false,
       rating: 0,
-      onSale: false,
     });
-    setCurrentCategory("all");
-    router.push("/products");
   };
 
   const formatPrice = (price) => {
@@ -167,52 +106,8 @@ function ProductsPageContent() {
     }).format(price);
   };
 
-  // Get current category info
-  const getCurrentCategoryInfo = () => {
-    if (currentCategory === "all") {
-      return {
-        name: "Semua Produk",
-        description: "Jelajahi koleksi lengkap produk tempe berkualitas kami",
-      };
-    }
-    return (
-      categoryDefinitions[currentCategory] || {
-        name: "Produk",
-        description: "",
-      }
-    );
-  };
-
-  const categoryInfo = getCurrentCategoryInfo();
-
   const FilterSidebar = () => (
     <div className="space-y-6">
-      {/* Quick Filters */}
-      <div>
-        <h3 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-2">
-          <Filter className="w-4 h-4" />
-          Filter Cepat
-        </h3>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Checkbox id="on-sale" checked={filters.onSale} onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, onSale: checked }))} />
-            <Label htmlFor="on-sale" className="text-sm cursor-pointer flex items-center gap-2">
-              <Tag className="w-4 h-4 text-destructive" />
-              Sedang Promo
-            </Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Checkbox id="in-stock" checked={filters.inStock} onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, inStock: checked }))} />
-            <Label htmlFor="in-stock" className="text-sm cursor-pointer">
-              Stok Tersedia Saja
-            </Label>
-          </div>
-        </div>
-      </div>
-
-      <div className="h-px bg-border" />
-
-      {/* Categories */}
       <div>
         <h3 className="font-semibold text-sm text-foreground mb-3">Kategori</h3>
         <div className="space-y-2">
@@ -234,9 +129,6 @@ function ProductsPageContent() {
         </div>
       </div>
 
-      <div className="h-px bg-border" />
-
-      {/* Price Range */}
       <div>
         <h3 className="font-semibold text-sm text-foreground mb-3">Rentang Harga</h3>
         <div className="space-y-4">
@@ -248,9 +140,6 @@ function ProductsPageContent() {
         </div>
       </div>
 
-      <div className="h-px bg-border" />
-
-      {/* Rating */}
       <div>
         <h3 className="font-semibold text-sm text-foreground mb-3">Rating Minimum</h3>
         <div className="space-y-2">
@@ -270,43 +159,23 @@ function ProductsPageContent() {
         </div>
       </div>
 
-      <div className="h-px bg-border" />
+      <div>
+        <div className="flex items-center gap-2">
+          <Checkbox id="in-stock" checked={filters.inStock} onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, inStock: checked }))} />
+          <Label htmlFor="in-stock" className="text-sm cursor-pointer">
+            Stok Tersedia Saja
+          </Label>
+        </div>
+      </div>
 
       <Button variant="outline" onClick={clearFilters} className="w-full">
-        <X className="w-4 h-4 mr-2" />
-        Reset Semua Filter
+        Reset Filter
       </Button>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <span className="hover:text-foreground cursor-pointer" onClick={() => router.push("/")}>
-              Home
-            </span>
-            <span>/</span>
-            <span className="text-foreground font-medium">{categoryInfo.name}</span>
-          </div>
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-2">
-                {categoryInfo.name}
-                {categoryInfo.badge && (
-                  <Badge variant="secondary" className="text-sm">
-                    {categoryInfo.badge}
-                  </Badge>
-                )}
-              </h1>
-              <p className="text-muted-foreground max-w-2xl">{categoryInfo.description}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Search Bar */}
         <div className="mb-6">
@@ -318,7 +187,8 @@ function ProductsPageContent() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" && searchQuery.trim()) {
+                  router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
                   fetchProducts();
                 }
               }}
@@ -329,13 +199,22 @@ function ProductsPageContent() {
                 <X className="w-5 h-5" />
               </button>
             )}
-            <Button onClick={fetchProducts} size="icon" className="absolute right-1 top-1/2 transform -translate-y-1/2 h-10 w-10">
+            <Button
+              onClick={() => {
+                if (searchQuery.trim()) {
+                  router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+                  fetchProducts();
+                }
+              }}
+              size="icon"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-10 w-10"
+            >
               <Search className="w-4 h-4" />
             </Button>
           </div>
 
           {/* Active Filters */}
-          {(filters.categories.length > 0 || filters.rating > 0 || filters.inStock || filters.onSale) && (
+          {(filters.categories.length > 0 || filters.rating > 0 || filters.inStock) && (
             <div className="flex items-center gap-2 mt-4 flex-wrap">
               <span className="text-sm text-muted-foreground">Filter aktif:</span>
               {filters.categories.map((catId) => {
@@ -349,15 +228,6 @@ function ProductsPageContent() {
                   </Badge>
                 );
               })}
-              {filters.onSale && (
-                <Badge variant="secondary" className="gap-1">
-                  <Tag className="w-3 h-3" />
-                  Promo
-                  <button onClick={() => setFilters((prev) => ({ ...prev, onSale: false }))}>
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              )}
               {filters.rating > 0 && (
                 <Badge variant="secondary" className="gap-1">
                   Rating {filters.rating}+
@@ -374,9 +244,6 @@ function ProductsPageContent() {
                   </button>
                 </Badge>
               )}
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7">
-                Hapus Semua
-              </Button>
             </div>
           )}
         </div>
@@ -384,7 +251,7 @@ function ProductsPageContent() {
         <div className="flex gap-6">
           {/* Desktop Filters */}
           <aside className="hidden lg:block w-64 shrink-0">
-            <Card className="sticky top-6">
+            <Card>
               <CardContent className="p-4">
                 <FilterSidebar />
               </CardContent>
@@ -396,7 +263,7 @@ function ProductsPageContent() {
             {/* Results Header */}
             <div className="flex items-center justify-between mb-4 pb-4 border-b">
               <p className="text-sm text-muted-foreground">
-                {loading ? "Memuat..." : `${totalResults} produk ditemukan`}
+                {loading ? "Mencari..." : `${totalResults} hasil ditemukan`}
                 {searchQuery && <span className="font-medium text-foreground"> untuk "{searchQuery}"</span>}
               </p>
 
@@ -409,7 +276,7 @@ function ProductsPageContent() {
                       Filter
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-80 overflow-y-auto">
+                  <SheetContent side="left" className="w-80">
                     <SheetHeader>
                       <SheetTitle>Filter Produk</SheetTitle>
                       <SheetDescription>Sesuaikan pencarian Anda</SheetDescription>
@@ -463,9 +330,9 @@ function ProductsPageContent() {
               <Card>
                 <CardContent className="py-16 text-center">
                   <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Package className="w-8 h-8 text-muted-foreground" />
+                    <Search className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">Tidak ada produk ditemukan</h3>
+                  <h3 className="text-lg font-medium text-foreground mb-2">Tidak ada hasil ditemukan</h3>
                   <p className="text-sm text-muted-foreground mb-6">Coba kata kunci lain atau ubah filter pencarian</p>
                   <Button onClick={clearFilters}>Reset Filter</Button>
                 </CardContent>
@@ -474,19 +341,12 @@ function ProductsPageContent() {
               <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
                 {products.map((product) => (
                   <Card key={product.id} className={`overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group ${viewMode === "list" ? "flex" : ""}`} onClick={() => router.push(`/products/${product.id}`)}>
-                    <div className={`${viewMode === "list" ? "w-48 shrink-0" : "aspect-square"} relative`}>
+                    <div className={viewMode === "list" ? "w-48 shrink-0" : "aspect-square"}>
                       {product.image ? (
                         <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       ) : (
                         <div className="w-full h-full bg-muted flex items-center justify-center">
                           <Package className="w-12 h-12 text-muted-foreground" />
-                        </div>
-                      )}
-                      {product.discount && (
-                        <div className="absolute top-2 left-2">
-                          <Badge variant="destructive" className="text-xs">
-                            -{product.discount}%
-                          </Badge>
                         </div>
                       )}
                     </div>
@@ -533,19 +393,19 @@ function ProductsPageContent() {
   );
 }
 
-export default function ProductsPage() {
+export default function SearchPage() {
   return (
     <Suspense
       fallback={
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Memuat produk...</p>
+            <p className="text-muted-foreground">Memuat...</p>
           </div>
         </div>
       }
     >
-      <ProductsPageContent />
+      <SearchPageContent />
     </Suspense>
   );
 }

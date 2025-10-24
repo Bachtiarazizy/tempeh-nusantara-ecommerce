@@ -1,286 +1,447 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronRight, Star, Minus, Plus, ChevronDown, Heart, Share2, ShoppingCart, AlertCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Star,
+  Heart,
+  Share2,
+  ShoppingCart,
+  Minus,
+  Plus,
+  Check,
+  X,
+  Package,
+  Truck,
+  Shield,
+  RotateCcw,
+  Award,
+  MapPin,
+  ChevronRight,
+  MessageCircle,
+  ThumbsUp,
+  ThumbsDown,
+  User,
+  Layers,
+  TrendingUp,
+  Clock,
+  Info,
+  ExternalLink,
+  ChevronLeft,
+  Zap,
+  Gift,
+} from "lucide-react";
+import { toast } from "sonner";
 
-// Mock ProductCard component
-const ProductCard = ({ id, name, price, image, badge, inStock, slug }) => (
-  <div className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
-    <div className="aspect-square bg-gray-100 rounded mb-3 overflow-hidden">
-      <img src={image} alt={name} className="w-full h-full object-cover" />
-    </div>
-    {badge && <Badge className="mb-2">{badge}</Badge>}
-    <h3 className="font-semibold text-sm mb-2">{name}</h3>
-    <p className="text-green-600 font-bold mb-3">Rp {price.toLocaleString()}</p>
-    <Button size="sm" className="w-full" disabled={!inStock}>
-      {inStock ? "View Details" : "Out of Stock"}
-    </Button>
-  </div>
-);
-
-const ProductDetailsPage = ({ slug }) => {
-  const [mounted, setMounted] = useState(false);
+export default function ProductDetailPage() {
+  const router = useRouter();
+  const params = useParams();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Product data from API
   const [product, setProduct] = useState(null);
-  const [relatedProducts, setRelatedProducts] = useState([]);
-
-  // UI States
-  const [selectedVariant, setSelectedVariant] = useState("");
-  const [selectedWeight, setSelectedWeight] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(true);
-  const [isNutritionOpen, setIsNutritionOpen] = useState(false);
-  const [isIngredientsOpen, setIsIngredientsOpen] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [currentPrice, setCurrentPrice] = useState(0);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [activeTab, setActiveTab] = useState("description");
 
+  // Mock product data - replace with API call
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    const mockProduct = {
+      id: params.id,
+      name: "Tempe Premium Export Grade A",
+      slug: "tempe-premium-export-grade-a",
+      category: "Premium",
+      brand: "Tempe Nusantara",
+      sku: "TPE-001-500",
+      price: 25000,
+      originalPrice: 35000,
+      discount: 29,
+      rating: 4.8,
+      reviewCount: 247,
+      soldCount: 1523,
+      stock: 150,
+      minOrder: 1,
+      maxOrder: 100,
+      weight: 500,
+      images: [
+        "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=800",
+        "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800",
+        "https://images.unsplash.com/photo-1589621316382-008455b857cd?w=800",
+        "https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800",
+      ],
+      description: `Tempe Premium Export Grade A adalah produk tempe berkualitas tinggi yang diproduksi dengan standar internasional. Dibuat dari kedelai pilihan organik dan difermentasi dengan ragi berkualitas premium.
 
-  // Fetch product data
-  useEffect(() => {
-    if (!mounted || !slug) return;
+Produk ini telah melewati berbagai sertifikasi kualitas dan food safety, menjadikannya pilihan sempurna untuk konsumen yang mengutamakan kesehatan dan kualitas.`,
 
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+      features: [
+        "100% Kedelai Organik Bersertifikat",
+        "Tanpa Pengawet & MSG",
+        "Proses Fermentasi Tradisional 36 Jam",
+        "Dikemas Vacuum Sealed untuk Kesegaran Maksimal",
+        "Halal & BPOM Certified",
+        "High Protein Content (19g per 100g)",
+        "Kaya Probiotik Alami",
+        "Export Quality Standard",
+      ],
 
-        const response = await fetch(`/api/products/${slug}`);
-        const data = await response.json();
+      specifications: [
+        { label: "Berat Bersih", value: "500 gram" },
+        { label: "Bahan Utama", value: "Kedelai Organik" },
+        { label: "Masa Simpan", value: "7 hari (suhu ruang), 30 hari (frozen)" },
+        { label: "Metode Produksi", value: "Fermentasi Tradisional" },
+        { label: "Protein", value: "19g per 100g" },
+        { label: "Serat", value: "4g per 100g" },
+        { label: "Negara Asal", value: "Indonesia" },
+        { label: "Sertifikasi", value: "Halal, BPOM, Organic" },
+      ],
 
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to fetch product");
-        }
+      variants: [
+        { id: 1, name: "500g", price: 25000, stock: 150 },
+        { id: 2, name: "1kg", price: 45000, stock: 80 },
+        { id: 3, name: "2kg (Hemat)", price: 85000, stock: 45 },
+      ],
 
-        const { product: productData, relatedProducts: related } = data.data;
+      benefits: [
+        {
+          icon: Shield,
+          title: "Garansi Kualitas",
+          description: "100% uang kembali jika produk tidak sesuai",
+        },
+        {
+          icon: Truck,
+          title: "Gratis Ongkir",
+          description: "Pembelian minimal Rp 100.000",
+        },
+        {
+          icon: RotateCcw,
+          title: "Easy Return",
+          description: "Pengembalian mudah dalam 7 hari",
+        },
+        {
+          icon: Award,
+          title: "Sertifikat Premium",
+          description: "BPOM, Halal, & Organic Certified",
+        },
+      ],
 
-        setProduct(productData);
-        setRelatedProducts(related);
+      reviews: [
+        {
+          id: 1,
+          user: "Budi Santoso",
+          avatar: null,
+          rating: 5,
+          date: "2 hari yang lalu",
+          variant: "500g",
+          comment: "Kualitas premium banget! Rasanya enak, teksturnya padat, dan packaging rapi. Pengiriman juga cepat. Highly recommended!",
+          helpful: 24,
+          images: [],
+        },
+        {
+          id: 2,
+          user: "Siti Rahayu",
+          avatar: null,
+          rating: 5,
+          date: "1 minggu yang lalu",
+          variant: "1kg",
+          comment: "Sudah order berkali-kali, selalu puas! Tempenya segar, tidak berbau aneh. Cocok untuk yang sedang diet tinggi protein.",
+          helpful: 18,
+          images: [],
+        },
+        {
+          id: 3,
+          user: "Ahmad Hidayat",
+          avatar: null,
+          rating: 4,
+          date: "2 minggu yang lalu",
+          variant: "2kg (Hemat)",
+          comment: "Bagus sih, tapi harga agak mahal. Tapi sebanding dengan kualitas yang didapat. Packing aman banget.",
+          helpful: 12,
+          images: [],
+        },
+      ],
 
-        // Set defaults
-        if (productData.variants?.length > 0) {
-          setSelectedVariant(productData.variants[0]);
-        }
-
-        const defaultWeight = productData.weights?.find((w) => w.selected) || productData.weights?.[0];
-        if (defaultWeight) {
-          setSelectedWeight(defaultWeight.label);
-          setCurrentPrice(defaultWeight.price || productData.price);
-        } else {
-          setCurrentPrice(productData.price);
-        }
-      } catch (err) {
-        console.error("Error fetching product:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      relatedProducts: [
+        { id: 2, name: "Tempe Organik Premium", price: 22000, image: null, rating: 4.7 },
+        { id: 3, name: "Tempe Tradisional Asli", price: 15000, image: null, rating: 4.6 },
+        { id: 4, name: "Paket Hemat Tempe 5kg", price: 200000, image: null, rating: 4.9 },
+      ],
     };
 
-    fetchProduct();
-  }, [mounted, slug]);
+    setTimeout(() => {
+      setProduct(mockProduct);
+      setSelectedVariant(mockProduct.variants[0]);
+      setLoading(false);
+    }, 800);
+  }, [params.id]);
 
-  // Update price when weight changes
-  useEffect(() => {
-    if (product && selectedWeight) {
-      const weightOption = product.weights?.find((w) => w.label === selectedWeight);
-      setCurrentPrice(weightOption?.price || product.price);
+  const handleQuantityChange = (type) => {
+    if (type === "increase" && quantity < product.maxOrder) {
+      setQuantity(quantity + 1);
+    } else if (type === "decrease" && quantity > product.minOrder) {
+      setQuantity(quantity - 1);
     }
-  }, [product, selectedWeight]);
+  };
 
-  const handleAddToCart = async () => {
-    setIsAddingToCart(true);
+  const handleAddToCart = () => {
+    toast.success("Produk berhasil ditambahkan ke keranjang!");
+  };
+
+  const handleBuyNow = () => {
+    toast.success("Redirecting to checkout...");
+    router.push("/checkout");
+  };
+
+  const handleShare = async () => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const weightOption = product.weights?.find((w) => w.label === selectedWeight);
-
-      // Add to cart logic here
-      console.log("Added to cart:", {
-        productId: product.id,
-        name: product.name,
-        price: weightOption?.price || product.price,
-        weight: selectedWeight,
-        variant: selectedVariant,
-        quantity,
+      await navigator.share({
+        title: product.name,
+        text: `Check out ${product.name}!`,
+        url: window.location.href,
       });
-
-      alert("Product added to cart!");
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    } finally {
-      setIsAddingToCart(false);
+    } catch (err) {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Link berhasil disalin!");
     }
   };
 
-  const handleBuyNow = async () => {
-    await handleAddToCart();
-    window.location.href = "/checkout";
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
   };
 
-  const renderStars = (rating) => {
-    return [...Array(5)].map((_, i) => <Star key={i} className={`w-4 h-4 ${i < Math.floor(rating) ? "text-yellow-400 fill-yellow-400" : i < rating ? "text-yellow-400 fill-yellow-400 opacity-50" : "text-gray-300"}`} />);
+  const calculateDiscount = () => {
+    if (!product.originalPrice) return 0;
+    return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
   };
 
-  if (!mounted || loading) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading product details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !product) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-red-600" />
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div className="aspect-square bg-muted animate-pulse rounded-lg" />
+              <div className="grid grid-cols-4 gap-2">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="aspect-square bg-muted animate-pulse rounded-lg" />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="h-8 bg-muted animate-pulse rounded w-3/4" />
+              <div className="h-6 bg-muted animate-pulse rounded w-1/2" />
+              <div className="h-12 bg-muted animate-pulse rounded w-1/3" />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h1>
-          <p className="text-gray-600 mb-6">{error || "The product you're looking for doesn't exist."}</p>
-          <Button onClick={() => (window.location.href = "/products")}>Back to Products</Button>
         </div>
       </div>
     );
   }
 
-  const breadcrumbs = [
-    { label: "Shop All", href: "/products" },
-    { label: product.category, href: `/products?category=${product.category}` },
-    { label: product.name, href: `/products/${product.slug}` },
-  ];
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Produk tidak ditemukan</h2>
+          <Button onClick={() => router.push("/products")}>Kembali ke Produk</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
-          {breadcrumbs.map((item, index) => (
-            <div key={item.label} className="flex items-center">
-              <a href={item.href} className="hover:text-gray-900 transition-colors">
-                {item.label}
-              </a>
-              {index < breadcrumbs.length - 1 && <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />}
-            </div>
-          ))}
-        </nav>
+    <div className="min-h-screen bg-background">
+      {/* Breadcrumb */}
+      <div className="border-b bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="hover:text-foreground cursor-pointer" onClick={() => router.push("/")}>
+              Home
+            </span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="hover:text-foreground cursor-pointer" onClick={() => router.push("/products")}>
+              Produk
+            </span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="hover:text-foreground cursor-pointer" onClick={() => router.push(`/products?category=${product.category.toLowerCase()}`)}>
+              {product.category}
+            </span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-foreground font-medium truncate max-w-[200px]">{product.name}</span>
+          </div>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Images */}
-          <div className="space-y-4">
-            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
-              {/* Badges */}
-              <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-                {product.isNew && <Badge className="bg-green-500 text-white">New</Badge>}
-                {product.isOnSale && product.discount > 0 && <Badge className="bg-red-500 text-white">-{product.discount}%</Badge>}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Image Gallery */}
+          <div className="lg:col-span-5">
+            <div className="sticky top-6">
+              {/* Main Image */}
+              <div className="relative aspect-square rounded-xl overflow-hidden bg-muted mb-4 group">
+                {product.images[selectedImage] ? (
+                  <img src={product.images[selectedImage]} alt={product.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Package className="w-24 h-24 text-muted-foreground" />
+                  </div>
+                )}
+                {product.discount > 0 && (
+                  <Badge variant="destructive" className="absolute top-4 left-4 text-base px-3 py-1">
+                    -{product.discount}%
+                  </Badge>
+                )}
+
+                {/* Image Navigation Arrows */}
+                {product.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setSelectedImage((prev) => (prev > 0 ? prev - 1 : product.images.length - 1))}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/80 backdrop-blur rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button
+                      onClick={() => setSelectedImage((prev) => (prev < product.images.length - 1 ? prev + 1 : 0))}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/80 backdrop-blur rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </>
+                )}
               </div>
 
-              <img src={product.images[selectedImageIndex] || product.image} alt={product.name} className="w-full h-full object-cover" />
-            </div>
-
-            {/* Thumbnail images */}
-            {product.images?.length > 1 && (
+              {/* Thumbnail Images */}
               <div className="grid grid-cols-4 gap-2">
-                {product.images.slice(0, 4).map((img, index) => (
+                {product.images.map((image, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`aspect-square bg-gray-100 rounded overflow-hidden border-2 transition-colors ${selectedImageIndex === index ? "border-green-600" : "border-transparent hover:border-gray-300"}`}
+                    onClick={() => setSelectedImage(index)}
+                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index ? "border-primary scale-95" : "border-transparent hover:border-muted-foreground/30"}`}
                   >
-                    <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                    {image ? (
+                      <img src={image} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-muted flex items-center justify-center">
+                        <Package className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
-            )}
+
+              {/* Share & Favorite */}
+              <div className="flex gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setIsFavorite(!isFavorite);
+                    toast.success(isFavorite ? "Dihapus dari wishlist" : "Ditambahkan ke wishlist");
+                  }}
+                >
+                  <Heart className={`w-4 h-4 mr-2 ${isFavorite ? "fill-destructive text-destructive" : ""}`} />
+                  {isFavorite ? "Tersimpan" : "Simpan"}
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={handleShare}>
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Bagikan
+                </Button>
+              </div>
+            </div>
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
-            {/* Title and Price */}
-            <div>
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-                {product.tags?.slice(0, 2).map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
+          <div className="lg:col-span-7">
+            <div className="space-y-6">
+              {/* Header */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="secondary">{product.category}</Badge>
+                  {product.badge && <Badge variant="outline">{product.badge}</Badge>}
+                  <Badge variant="outline" className="gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    Best Seller
                   </Badge>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-3 mb-4">
-                <div className="text-3xl font-bold text-gray-900">Rp {(currentPrice * quantity).toLocaleString()}</div>
-                {product.originalPrice && product.originalPrice > currentPrice && <div className="text-xl text-gray-500 line-through">Rp {(product.originalPrice * quantity).toLocaleString()}</div>}
-              </div>
-
-              {/* Rating */}
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="flex">{renderStars(product.rating)}</div>
-                <span className="text-sm text-gray-600">
-                  ({product.rating}) • {product.reviewCount} reviews
-                </span>
-              </div>
-
-              {/* Stock Status */}
-              <div className="flex items-center gap-2 mb-4">{product.inStock ? <Badge className="bg-green-100 text-green-800">In Stock ({product.stockQuantity} available)</Badge> : <Badge variant="destructive">Out of Stock</Badge>}</div>
-            </div>
-
-            {/* Description */}
-            <p className="text-gray-600 leading-relaxed">{product.description}</p>
-
-            {/* Variant Selection */}
-            <div className="space-y-4">
-              {/* Variant Dropdown */}
-              {product.variants?.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">Variant</label>
-                  <Select value={selectedVariant} onValueChange={setSelectedVariant}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select Variant" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {product.variants.map((variant) => (
-                        <SelectItem key={variant} value={variant}>
-                          {variant}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
-              )}
 
-              {/* Weight Selection */}
-              {product.weights?.length > 0 && (
+                <h1 className="text-3xl font-bold text-foreground mb-3">{product.name}</h1>
+
+                <div className="flex items-center gap-4 mb-4">
+                  {/* Rating */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      <span className="font-semibold text-foreground">{product.rating}</span>
+                    </div>
+                    <Separator orientation="vertical" className="h-4" />
+                    <button className="text-sm text-muted-foreground hover:text-primary" onClick={() => setActiveTab("reviews")}>
+                      {product.reviewCount} Ulasan
+                    </button>
+                  </div>
+
+                  {/* Sold Count */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Separator orientation="vertical" className="h-4" />
+                    <Package className="w-4 h-4" />
+                    <span>{product.soldCount} Terjual</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>
+                    Brand: <span className="text-foreground font-medium">{product.brand}</span>
+                  </span>
+                  <Separator orientation="vertical" className="h-4" />
+                  <span>SKU: {product.sku}</span>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Price */}
+              <div className="bg-muted/50 rounded-xl p-6">
+                <div className="flex items-end gap-3 mb-2">
+                  <span className="text-4xl font-bold text-primary">{formatPrice(selectedVariant?.price || product.price)}</span>
+                  {product.originalPrice && (
+                    <>
+                      <span className="text-xl text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
+                      <Badge variant="destructive" className="mb-1">
+                        Hemat {calculateDiscount()}%
+                      </Badge>
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Zap className="w-4 h-4 text-amber-500" />
+                  <span>Flash Sale berakhir dalam 2 jam 34 menit</span>
+                </div>
+              </div>
+
+              {/* Variants */}
+              {product.variants && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">Weight</label>
-                  <div className="flex flex-wrap gap-2">
-                    {product.weights.map((weight) => (
-                      <Button
-                        key={weight.value}
-                        variant={selectedWeight === weight.label ? "default" : "outline"}
-                        size="sm"
-                        disabled={weight.disabled}
-                        onClick={() => setSelectedWeight(weight.label)}
-                        className={`${selectedWeight === weight.label ? "bg-green-600 text-white hover:bg-green-700" : ""}`}
+                  <Label className="text-sm font-semibold mb-3 block">Pilih Ukuran:</Label>
+                  <div className="flex gap-2">
+                    {product.variants.map((variant) => (
+                      <button
+                        key={variant.id}
+                        onClick={() => setSelectedVariant(variant)}
+                        className={`px-6 py-3 rounded-lg border-2 font-medium transition-all ${
+                          selectedVariant?.id === variant.id ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/20 hover:border-primary/50"
+                        }`}
                       >
-                        {weight.label}
-                        {weight.price && <span className="ml-1 text-xs">(Rp {weight.price.toLocaleString()})</span>}
-                      </Button>
+                        {variant.name}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -288,171 +449,395 @@ const ProductDetailsPage = ({ slug }) => {
 
               {/* Quantity */}
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Quantity</label>
-                <div className="flex items-center space-x-3">
-                  <Button variant="outline" size="icon" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <span className="text-lg font-medium w-12 text-center">{quantity}</span>
-                  <Button variant="outline" size="icon" onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))} disabled={quantity >= product.stockQuantity}>
-                    <Plus className="w-4 h-4" />
-                  </Button>
+                <Label className="text-sm font-semibold mb-3 block">Jumlah:</Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center border rounded-lg">
+                    <button onClick={() => handleQuantityChange("decrease")} disabled={quantity <= product.minOrder} className="p-3 hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed">
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 1;
+                        if (val >= product.minOrder && val <= product.maxOrder) {
+                          setQuantity(val);
+                        }
+                      }}
+                      className="w-16 text-center border-x bg-transparent outline-none"
+                    />
+                    <button onClick={() => handleQuantityChange("increase")} disabled={quantity >= product.maxOrder} className="p-3 hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed">
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Stok: <span className="font-semibold text-foreground">{selectedVariant?.stock || product.stock}</span> tersedia
+                  </div>
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Min. order: {product.minOrder} | Max. order: {product.maxOrder}
+                </p>
               </div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-medium" onClick={handleAddToCart} disabled={isAddingToCart || !product.inStock}>
-                {isAddingToCart ? (
-                  <div className="flex items-center">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Adding to Cart...
-                  </div>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-5 h-5 mr-2" />
-                    Add to Cart - Rp {(currentPrice * quantity).toLocaleString()}
-                  </>
-                )}
-              </Button>
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Button variant="outline" size="lg" className="flex-1" onClick={handleAddToCart}>
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Tambah ke Keranjang
+                </Button>
+                <Button size="lg" className="flex-1" onClick={handleBuyNow}>
+                  Beli Sekarang
+                </Button>
+              </div>
 
-              <Button variant="outline" className="w-full border-2 border-green-600 text-green-600 hover:bg-green-50 py-6 text-lg font-medium" onClick={handleBuyNow} disabled={!product.inStock}>
-                Buy Now
-              </Button>
-            </div>
+              {/* Benefits Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {product.benefits.map((benefit, index) => {
+                  const IconComponent = benefit.icon;
+                  return (
+                    <Card key={index}>
+                      <CardContent className="p-4 flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <IconComponent className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm mb-1">{benefit.title}</h4>
+                          <p className="text-xs text-muted-foreground">{benefit.description}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
 
-            {/* Action Icons */}
-            <div className="flex items-center justify-center space-x-6 pt-4 border-t">
-              <Button variant="ghost" size="sm" onClick={() => setIsFavorited(!isFavorited)} className={`flex items-center space-x-2 ${isFavorited ? "text-red-500" : "text-gray-600"}`}>
-                <Heart className={`w-5 h-5 ${isFavorited ? "fill-current" : ""}`} />
-                <span>Add to Wishlist</span>
-              </Button>
-
-              <Button variant="ghost" size="sm" className="flex items-center space-x-2 text-gray-600">
-                <Share2 className="w-5 h-5" />
-                <span>Share</span>
-              </Button>
-            </div>
-
-            {/* Collapsible Sections */}
-            <div className="space-y-1 pt-6">
-              <Separator />
-
-              {/* Product Details */}
-              <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-                <CollapsibleTrigger className="flex items-center justify-between w-full py-4 text-left hover:text-green-600 transition-colors">
-                  <span className="font-semibold text-gray-900">Product Details</span>
-                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isDetailsOpen ? "rotate-180" : ""}`} />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="pb-4 space-y-4">
-                    <p className="text-gray-600 leading-relaxed">{product.longDescription}</p>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg">
-                      <div>
-                        <span className="font-medium">Weight:</span> {product.weight}
+              {/* Seller Info */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Layers className="w-6 h-6 text-primary" />
                       </div>
                       <div>
-                        <span className="font-medium">Category:</span> {product.category}
-                      </div>
-                      <div>
-                        <span className="font-medium">SKU:</span> {product.sku}
-                      </div>
-                      <div>
-                        <span className="font-medium">Stock:</span> {product.stockQuantity} units
-                      </div>
-                    </div>
-
-                    {product.storageInstructions && (
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <p className="font-medium text-sm mb-1">Storage:</p>
-                        <p className="text-sm text-gray-700">{product.storageInstructions}</p>
-                      </div>
-                    )}
-
-                    {product.cookingInstructions && (
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <p className="font-medium text-sm mb-1">Cooking:</p>
-                        <p className="text-sm text-gray-700">{product.cookingInstructions}</p>
-                      </div>
-                    )}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Separator />
-
-              {/* Nutrition Information */}
-              {product.nutritionPer100g && (
-                <>
-                  <Collapsible open={isNutritionOpen} onOpenChange={setIsNutritionOpen}>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full py-4 text-left hover:text-green-600 transition-colors">
-                      <span className="font-semibold text-gray-900">Nutrition Information</span>
-                      <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isNutritionOpen ? "rotate-180" : ""}`} />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="pb-4">
-                        <p className="text-sm text-gray-600 mb-3 font-medium">Per 100g serving:</p>
-                        <div className="grid grid-cols-2 gap-3 text-sm bg-gray-50 p-4 rounded-lg">
-                          {Object.entries(product.nutritionPer100g).map(([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="capitalize">{key}:</span>
-                              <span className="font-medium">
-                                {value}
-                                {key === "calories" ? " kcal" : key === "sodium" ? "mg" : "g"}
-                              </span>
-                            </div>
-                          ))}
+                        <h4 className="font-semibold">{product.brand}</h4>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="w-3 h-3" />
+                          <span>Jakarta, Indonesia</span>
                         </div>
                       </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                  <Separator />
-                </>
-              )}
-
-              {/* Ingredients */}
-              {product.ingredients && (
-                <Collapsible open={isIngredientsOpen} onOpenChange={setIsIngredientsOpen}>
-                  <CollapsibleTrigger className="flex items-center justify-between w-full py-4 text-left hover:text-green-600 transition-colors">
-                    <span className="font-semibold text-gray-900">Ingredients & Allergens</span>
-                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isIngredientsOpen ? "rotate-180" : ""}`} />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="pb-4 space-y-3">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="font-medium text-sm mb-2">Ingredients:</p>
-                        <p className="text-sm text-gray-700">{product.ingredients.join(", ")}</p>
-                      </div>
-                      {product.allergens && (
-                        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                          <p className="font-medium text-sm mb-2 text-yellow-900">⚠️ Allergens:</p>
-                          <p className="text-sm text-yellow-800">{product.allergens.join(", ")}</p>
-                        </div>
-                      )}
                     </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              )}
+                    <Button variant="outline" size="sm">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Chat
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
 
-        {/* Related Products Section */}
-        {relatedProducts.length > 0 && (
-          <div className="mt-16 border-t pt-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">You might also like</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((relatedProduct) => (
-                <ProductCard key={relatedProduct.id} {...relatedProduct} />
-              ))}
-            </div>
+        {/* Detailed Information Tabs */}
+        <div className="mt-12">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="description">Deskripsi</TabsTrigger>
+              <TabsTrigger value="specifications">Spesifikasi</TabsTrigger>
+              <TabsTrigger value="reviews">Ulasan ({product.reviewCount})</TabsTrigger>
+              <TabsTrigger value="shipping">Pengiriman</TabsTrigger>
+            </TabsList>
+
+            {/* Description */}
+            <TabsContent value="description" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4">Deskripsi Produk</h3>
+                  <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-line mb-6">{product.description}</div>
+
+                  <h4 className="font-semibold mb-3">Keunggulan Produk:</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {product.features.map((feature, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Specifications */}
+            <TabsContent value="specifications" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4">Spesifikasi Produk</h3>
+                  <div className="space-y-3">
+                    {product.specifications.map((spec, index) => (
+                      <div key={index} className="flex py-3 border-b last:border-0">
+                        <span className="w-1/3 text-sm text-muted-foreground">{spec.label}</span>
+                        <span className="w-2/3 text-sm font-medium">{spec.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Reviews */}
+            <TabsContent value="reviews" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  {/* Rating Summary */}
+                  <div className="flex items-start gap-8 mb-8 pb-8 border-b">
+                    <div className="text-center">
+                      <div className="text-5xl font-bold mb-2">{product.rating}</div>
+                      <div className="flex justify-center mb-2">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star key={i} className={`w-5 h-5 ${i < Math.floor(product.rating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`} />
+                        ))}
+                      </div>
+                      <div className="text-sm text-muted-foreground">{product.reviewCount} ulasan</div>
+                    </div>
+
+                    <div className="flex-1 space-y-2">
+                      {[5, 4, 3, 2, 1].map((star) => (
+                        <div key={star} className="flex items-center gap-3">
+                          <span className="text-sm w-8">{star} ★</span>
+                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-400" style={{ width: `${Math.random() * 100}%` }} />
+                          </div>
+                          <span className="text-sm text-muted-foreground w-12 text-right">{Math.floor(Math.random() * 100)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Review List */}
+                  <div className="space-y-6">
+                    {product.reviews.map((review) => (
+                      <div key={review.id} className="pb-6 border-b last:border-0">
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <User className="w-5 h-5 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <h4 className="font-semibold text-sm">{review.user}</h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <div className="flex">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                      <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`} />
+                                    ))}
+                                  </div>
+                                  <span className="text-xs text-muted-foreground">• {review.date}</span>
+                                </div>
+                              </div>
+                              <Badge variant="secondary" className="text-xs">
+                                {review.variant}
+                              </Badge>
+                            </div>
+
+                            <p className="text-sm text-muted-foreground mb-3">{review.comment}</p>
+
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                              <button className="flex items-center gap-1 hover:text-foreground">
+                                <ThumbsUp className="w-4 h-4" />
+                                Membantu ({review.helpful})
+                              </button>
+                              <button className="flex items-center gap-1 hover:text-foreground">
+                                <MessageCircle className="w-4 h-4" />
+                                Balas
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button variant="outline" className="w-full mt-6">
+                    Lihat Semua Ulasan
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Shipping */}
+            <TabsContent value="shipping" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-6">Informasi Pengiriman</h3>
+
+                  <div className="space-y-6">
+                    {/* Shipping Calculator */}
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <Label className="text-sm font-semibold mb-3 block">Cek Ongkos Kirim</Label>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <Input placeholder="Masukkan kode pos atau kota" />
+                        </div>
+                        <Button>Cek Ongkir</Button>
+                      </div>
+                    </div>
+
+                    {/* Shipping Options */}
+                    <div>
+                      <h4 className="font-semibold mb-3">Pilihan Pengiriman:</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Truck className="w-5 h-5 text-primary" />
+                            <div>
+                              <p className="font-medium text-sm">Reguler (JNE/J&T/SiCepat)</p>
+                              <p className="text-xs text-muted-foreground">Estimasi 3-5 hari kerja</p>
+                            </div>
+                          </div>
+                          <span className="font-semibold">Rp 15.000</span>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Zap className="w-5 h-5 text-amber-500" />
+                            <div>
+                              <p className="font-medium text-sm">Express (Same Day/Next Day)</p>
+                              <p className="text-xs text-muted-foreground">Estimasi 1-2 hari kerja</p>
+                            </div>
+                          </div>
+                          <span className="font-semibold">Rp 35.000</span>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 border rounded-lg bg-primary/5">
+                          <div className="flex items-center gap-3">
+                            <Gift className="w-5 h-5 text-primary" />
+                            <div>
+                              <p className="font-medium text-sm">Gratis Ongkir</p>
+                              <p className="text-xs text-muted-foreground">Min. belanja Rp 100.000</p>
+                            </div>
+                          </div>
+                          <Badge variant="secondary">GRATIS</Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Shipping Policy */}
+                    <div>
+                      <h4 className="font-semibold mb-3">Kebijakan Pengiriman:</h4>
+                      <div className="space-y-2 text-sm text-muted-foreground">
+                        <div className="flex items-start gap-2">
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>Pesanan diproses dalam 1x24 jam (hari kerja)</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>Packaging aman dengan bubble wrap dan ice pack untuk menjaga kesegaran</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>Asuransi pengiriman gratis untuk semua pesanan</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>Nomor resi akan dikirim otomatis via WhatsApp/Email</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Return Policy */}
+                    <div className="bg-muted/30 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <RotateCcw className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-2">Kebijakan Pengembalian</h4>
+                          <p className="text-sm text-muted-foreground mb-3">Kami menerima pengembalian produk dalam 7 hari jika produk rusak atau tidak sesuai pesanan.</p>
+                          <Button variant="link" className="p-0 h-auto text-sm">
+                            Baca Selengkapnya <ExternalLink className="w-3 h-3 ml-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Related Products */}
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Produk Terkait</h2>
+            <Button variant="ghost" onClick={() => router.push("/products")}>
+              Lihat Semua
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
           </div>
-        )}
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {product.relatedProducts.map((relatedProduct) => (
+              <Card key={relatedProduct.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => router.push(`/products/${relatedProduct.id}`)}>
+                <div className="aspect-square bg-muted">
+                  {relatedProduct.image ? (
+                    <img src={relatedProduct.image} alt={relatedProduct.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="w-12 h-12 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-medium text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{relatedProduct.name}</h3>
+                  <div className="flex items-center gap-1 mb-2">
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <span className="text-xs text-muted-foreground">{relatedProduct.rating}</span>
+                  </div>
+                  <p className="text-lg font-bold text-primary">{formatPrice(relatedProduct.price)}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Recently Viewed */}
+        <div className="mt-12 bg-muted/30 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-5 h-5 text-muted-foreground" />
+            <h3 className="font-semibold">Terakhir Dilihat</h3>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="aspect-square bg-background rounded-lg border hover:border-primary transition-colors cursor-pointer flex items-center justify-center">
+                <Package className="w-8 h-8 text-muted-foreground" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Bottom Bar (Mobile) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 lg:hidden z-50">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setIsFavorite(!isFavorite);
+              toast.success(isFavorite ? "Dihapus dari wishlist" : "Ditambahkan ke wishlist");
+            }}
+            className="w-12 h-12 border rounded-lg flex items-center justify-center"
+          >
+            <Heart className={`w-5 h-5 ${isFavorite ? "fill-destructive text-destructive" : ""}`} />
+          </button>
+          <Button variant="outline" className="flex-1" onClick={handleAddToCart}>
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Keranjang
+          </Button>
+          <Button className="flex-1" onClick={handleBuyNow}>
+            Beli Sekarang
+          </Button>
+        </div>
       </div>
     </div>
   );
-};
-
-export default ProductDetailsPage;
+}
