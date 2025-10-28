@@ -133,9 +133,9 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground overflow-hidden">
+      <div className="relative bg-linear-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/50 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-primary/50 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex items-center gap-2 text-sm text-primary-foreground/80 mb-4">
@@ -385,7 +385,7 @@ export default function ContactPage() {
 
         {/* CTA Section */}
         <section>
-          <Card className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground overflow-hidden relative">
+          <Card className="bg-linear-to-r from-primary to-primary/80 text-primary-foreground overflow-hidden relative">
             <div className="absolute inset-0 bg-grid-white/10" />
             <CardContent className="p-8 md:p-12 relative">
               <div className="max-w-3xl mx-auto text-center">

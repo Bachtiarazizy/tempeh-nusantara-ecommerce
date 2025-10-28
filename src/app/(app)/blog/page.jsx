@@ -172,7 +172,7 @@ function BlogPageContent() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
+      <div className="bg-linear-to-r from-primary/10 via-primary/5 to-background border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <span className="hover:text-foreground cursor-pointer" onClick={() => router.push("/")}>
@@ -251,7 +251,7 @@ function BlogPageContent() {
               </Card>
 
               {/* Newsletter */}
-              <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+              <Card className="bg-linear-to-br from-primary/5 to-primary/10 border-primary/20">
                 <CardContent className="p-5">
                   <h3 className="font-semibold text-foreground mb-2">Newsletter</h3>
                   <p className="text-sm text-muted-foreground mb-4">Dapatkan artikel terbaru langsung di email Anda</p>
@@ -293,7 +293,7 @@ function BlogPageContent() {
 
                 {/* Sort */}
                 <Select value={filters.sortBy} onValueChange={(value) => setFilters((prev) => ({ ...prev, sortBy: value }))}>
-                  <SelectTrigger className="w-[160px] h-9">
+                  <SelectTrigger className="w-40 h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -345,7 +345,7 @@ function BlogPageContent() {
                         {post.image ? (
                           <img src={post.image} alt={post.title} className="w-full h-64 md:h-full object-cover group-hover:scale-105 transition-transform" />
                         ) : (
-                          <div className="w-full h-64 md:h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                          <div className="w-full h-64 md:h-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                             <BookOpen className="w-16 h-16 text-muted-foreground" />
                           </div>
                         )}
@@ -382,7 +382,7 @@ function BlogPageContent() {
 
                         <h2 className={`font-bold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2 ${index === 0 ? "text-2xl" : "text-xl"}`}>{post.title}</h2>
 
-                        <p className="text-muted-foreground mb-4 line-clamp-3 flex-grow">{post.excerpt || post.description}</p>
+                        <p className="text-muted-foreground mb-4 line-clamp-3 grow">{post.excerpt || post.description}</p>
 
                         <div className="flex items-center justify-between pt-4 border-t mt-auto">
                           <div className="flex items-center gap-3">

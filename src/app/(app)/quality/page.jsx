@@ -21,6 +21,10 @@ import {
   Droplets,
   Users,
   TrendingUp,
+  Package,
+  Truck,
+  Clock,
+  Mail,
   Eye,
   ClipboardCheck,
   Zap,
@@ -125,96 +129,56 @@ export default function QualityCertificationPage() {
       icon: Target,
       title: "Seleksi Bahan Baku",
       description: "Kedelai pilihan berkualitas premium dari petani terpercaya",
-      details: [
-        "Kedelai non-GMO berkualitas tinggi",
-        "Sortasi manual dan mesin untuk konsistensi",
-        "Uji kadar air dan kebersihan",
-        "Sertifikat kualitas dari supplier",
-      ],
+      details: ["Kedelai non-GMO berkualitas tinggi", "Sortasi manual dan mesin untuk konsistensi", "Uji kadar air dan kebersihan", "Sertifikat kualitas dari supplier"],
     },
     {
       step: 2,
       icon: Droplets,
       title: "Pencucian & Perendaman",
       description: "Proses pembersihan dengan standar sanitasi ketat",
-      details: [
-        "Air bersih dengan standar pH terkontrol",
-        "Perendaman 8-12 jam untuk tekstur optimal",
-        "Sistem filtrasi air bertingkat",
-        "Monitoring suhu dan waktu",
-      ],
+      details: ["Air bersih dengan standar pH terkontrol", "Perendaman 8-12 jam untuk tekstur optimal", "Sistem filtrasi air bertingkat", "Monitoring suhu dan waktu"],
     },
     {
       step: 3,
       icon: ThermometerSun,
       title: "Perebusan & Sterilisasi",
       description: "Sterilisasi pada suhu optimal untuk keamanan pangan",
-      details: [
-        "Suhu perebusan 90-100°C",
-        "Waktu perebusan terstandar",
-        "Eliminasi mikroorganisme berbahaya",
-        "Sistem otomatis dengan monitoring",
-      ],
+      details: ["Suhu perebusan 90-100°C", "Waktu perebusan terstandar", "Eliminasi mikroorganisme berbahaya", "Sistem otomatis dengan monitoring"],
     },
     {
       step: 4,
       icon: Beaker,
       title: "Inokulasi Ragi",
       description: "Penambahan kultur starter berkualitas tinggi",
-      details: [
-        "Ragi Rhizopus oligosporus murni",
-        "Ruangan steril ber-AC",
-        "Dosis tepat untuk fermentasi optimal",
-        "Quality control kultur berkala",
-      ],
+      details: ["Ragi Rhizopus oligosporus murni", "Ruangan steril ber-AC", "Dosis tepat untuk fermentasi optimal", "Quality control kultur berkala"],
     },
     {
       step: 5,
       icon: Factory,
       title: "Fermentasi Terkontrol",
       description: "Proses fermentasi dalam ruangan temperature-controlled",
-      details: [
-        "Suhu 28-32°C dengan humidity 70-80%",
-        "Waktu fermentasi 36-48 jam",
-        "Monitoring real-time 24/7",
-        "Sirkulasi udara optimal",
-      ],
+      details: ["Suhu 28-32°C dengan humidity 70-80%", "Waktu fermentasi 36-48 jam", "Monitoring real-time 24/7", "Sirkulasi udara optimal"],
     },
     {
       step: 6,
       icon: Microscope,
       title: "Quality Control",
       description: "Inspeksi ketat multi-tahap sebelum pengemasan",
-      details: [
-        "Uji visual: warna, tekstur, aroma",
-        "Uji mikrobiologi di laboratorium",
-        "Uji organoleptik oleh tim QC",
-        "Dokumentasi batch lengkap",
-      ],
+      details: ["Uji visual: warna, tekstur, aroma", "Uji mikrobiologi di laboratorium", "Uji organoleptik oleh tim QC", "Dokumentasi batch lengkap"],
     },
     {
       step: 7,
       icon: Package,
       title: "Pengemasan Higienis",
       description: "Packaging food-grade dalam ruang bersih",
-      details: [
-        "Plastik food-grade BPA-free",
-        "Vacuum seal untuk kesegaran",
-        "Labeling lengkap (expired, batch)",
-        "Pengemasan di clean room",
-      ],
+      details: ["Plastik food-grade BPA-free", "Vacuum seal untuk kesegaran", "Labeling lengkap (expired, batch)", "Pengemasan di clean room"],
     },
     {
       step: 8,
       icon: Truck,
       title: "Cold Chain Distribution",
       description: "Distribusi dengan sistem rantai dingin terpercaya",
-      details: [
-        "Suhu penyimpanan 0-4°C",
-        "Cold storage sebelum distribusi",
-        "Armada refrigerated trucks",
-        "GPS tracking real-time",
-      ],
+      details: ["Suhu penyimpanan 0-4°C", "Cold storage sebelum distribusi", "Armada refrigerated trucks", "GPS tracking real-time"],
     },
   ];
 
@@ -330,9 +294,9 @@ export default function QualityCertificationPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground overflow-hidden">
+      <div className="relative bg-linear-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/50 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-primary/50 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="flex items-center gap-2 text-sm text-primary-foreground/80 mb-4">
@@ -349,10 +313,7 @@ export default function QualityCertificationPage() {
               Certified Quality
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Kualitas Premium dengan Standar Internasional</h1>
-            <p className="text-lg text-primary-foreground/90 mb-8">
-              Komitmen kami pada kualitas terbaik tercermin dalam setiap sertifikasi dan proses produksi yang ketat. 
-              Keamanan dan kepuasan pelanggan adalah prioritas utama kami.
-            </p>
+            <p className="text-lg text-primary-foreground/90 mb-8">Komitmen kami pada kualitas terbaik tercermin dalam setiap sertifikasi dan proses produksi yang ketat. Keamanan dan kepuasan pelanggan adalah prioritas utama kami.</p>
             <div className="flex flex-wrap gap-4">
               <Button size="lg" variant="secondary">
                 <FileText className="w-5 h-5 mr-2" />
@@ -418,9 +379,7 @@ export default function QualityCertificationPage() {
             <TabsContent value="quality" className="space-y-12">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-foreground mb-4">Komitmen Kualitas Kami</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Setiap aspek produksi dirancang untuk menghasilkan tempe berkualitas tertinggi
-                </p>
+                <p className="text-muted-foreground max-w-2xl mx-auto">Setiap aspek produksi dirancang untuk menghasilkan tempe berkualitas tertinggi</p>
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -444,7 +403,7 @@ export default function QualityCertificationPage() {
               </div>
 
               {/* Quality Metrics */}
-              <Card className="bg-gradient-to-br from-primary/5 to-background">
+              <Card className="bg-linear-to-br from-primary/5 to-background">
                 <CardContent className="p-8">
                   <h3 className="text-2xl font-bold text-foreground mb-6 text-center">Metrik Kualitas</h3>
                   <div className="grid md:grid-cols-4 gap-6">
@@ -474,9 +433,7 @@ export default function QualityCertificationPage() {
             <TabsContent value="certifications" className="space-y-8">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-foreground mb-4">Sertifikasi Resmi</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Produk kami telah tersertifikasi oleh lembaga nasional dan internasional terpercaya
-                </p>
+                <p className="text-muted-foreground max-w-2xl mx-auto">Produk kami telah tersertifikasi oleh lembaga nasional dan internasional terpercaya</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
@@ -540,7 +497,9 @@ export default function QualityCertificationPage() {
                         <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/30 flex items-center justify-center mx-auto mb-4">
                           <Award className="w-8 h-8 text-amber-600" />
                         </div>
-                        <Badge variant="outline" className="mb-2">{award.year}</Badge>
+                        <Badge variant="outline" className="mb-2">
+                          {award.year}
+                        </Badge>
                         <h4 className="font-bold text-foreground mb-1">{award.title}</h4>
                         <p className="text-xs text-muted-foreground mb-2">{award.issuer}</p>
                         <p className="text-xs text-muted-foreground">{award.description}</p>
@@ -555,9 +514,7 @@ export default function QualityCertificationPage() {
             <TabsContent value="process" className="space-y-8">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-foreground mb-4">Proses Produksi Berkualitas</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  8 tahap proses produksi dengan kontrol kualitas ketat di setiap langkah
-                </p>
+                <p className="text-muted-foreground max-w-2xl mx-auto">8 tahap proses produksi dengan kontrol kualitas ketat di setiap langkah</p>
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -567,9 +524,7 @@ export default function QualityCertificationPage() {
                     <Card key={process.step} className="hover:shadow-lg transition-all hover:-translate-y-1">
                       <CardContent className="p-6">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold shrink-0">
-                            {process.step}
-                          </div>
+                          <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold shrink-0">{process.step}</div>
                           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                             <IconComponent className="w-6 h-6 text-primary" />
                           </div>
@@ -591,7 +546,7 @@ export default function QualityCertificationPage() {
               </div>
 
               {/* Facility Info */}
-              <Card className="bg-gradient-to-r from-primary/5 to-background">
+              <Card className="bg-linear-to-r from-primary/5 to-background">
                 <CardContent className="p-8">
                   <div className="flex flex-col md:flex-row items-center gap-8">
                     <div className="flex-1">
@@ -600,18 +555,9 @@ export default function QualityCertificationPage() {
                         Production Facility
                       </Badge>
                       <h3 className="text-2xl font-bold text-foreground mb-3">Fasilitas Produksi Modern</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Pabrik kami dilengkapi dengan teknologi terkini dan memenuhi standar GMP (Good Manufacturing Practice) 
-                        untuk memastikan kualitas konsisten setiap batch produksi.
-                      </p>
+                      <p className="text-muted-foreground mb-4">Pabrik kami dilengkapi dengan teknologi terkini dan memenuhi standar GMP (Good Manufacturing Practice) untuk memastikan kualitas konsisten setiap batch produksi.</p>
                       <ul className="space-y-2">
-                        {[
-                          "Clean room dengan kontrol suhu & humidity",
-                          "Sistem air bersih bertingkat",
-                          "Peralatan produksi stainless steel",
-                          "Automated quality monitoring",
-                          "Waste management system",
-                        ].map((feature, index) => (
+                        {["Clean room dengan kontrol suhu & humidity", "Sistem air bersih bertingkat", "Peralatan produksi stainless steel", "Automated quality monitoring", "Waste management system"].map((feature, index) => (
                           <li key={index} className="flex items-center gap-2">
                             <CheckCircle2 className="w-5 h-5 text-primary" />
                             <span className="text-sm text-muted-foreground">{feature}</span>
@@ -620,7 +566,7 @@ export default function QualityCertificationPage() {
                       </ul>
                     </div>
                     <div className="w-full md:w-1/3">
-                      <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                      <div className="aspect-square rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                         <Factory className="w-32 h-32 text-primary/40" />
                       </div>
                     </div>
@@ -633,9 +579,7 @@ export default function QualityCertificationPage() {
             <TabsContent value="lab" className="space-y-8">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-foreground mb-4">Pengujian Laboratorium</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Setiap batch produk melewati serangkaian tes laboratorium komprehensif
-                </p>
+                <p className="text-muted-foreground max-w-2xl mx-auto">Setiap batch produk melewati serangkaian tes laboratorium komprehensif</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
@@ -659,9 +603,7 @@ export default function QualityCertificationPage() {
                                 <p className="font-medium text-sm text-foreground">{test.name}</p>
                                 <p className="text-xs text-muted-foreground">Standard: {test.standard}</p>
                               </div>
-                              <Badge variant={test.result === "Pass" || test.result === "ND" ? "default" : "secondary"}>
-                                {test.result}
-                              </Badge>
+                              <Badge variant={test.result === "Pass" || test.result === "ND" ? "default" : "secondary"}>{test.result}</Badge>
                             </div>
                           ))}
                         </div>
@@ -672,7 +614,7 @@ export default function QualityCertificationPage() {
               </div>
 
               {/* Lab Facility */}
-              <Card className="bg-gradient-to-br from-blue-50 to-background dark:from-blue-950/20">
+              <Card className="bg-linear-to-br from-blue-50 to-background dark:from-blue-950/20">
                 <CardContent className="p-8">
                   <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div>
@@ -681,10 +623,7 @@ export default function QualityCertificationPage() {
                         Laboratory
                       </Badge>
                       <h3 className="text-2xl font-bold text-foreground mb-3">Laboratorium In-House</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Dilengkapi dengan peralatan testing modern dan dioperasikan oleh tim analis bersertifikat 
-                        untuk memastikan setiap produk memenuhi standar kualitas tertinggi.
-                      </p>
+                      <p className="text-muted-foreground mb-4">Dilengkapi dengan peralatan testing modern dan dioperasikan oleh tim analis bersertifikat untuk memastikan setiap produk memenuhi standar kualitas tertinggi.</p>
                       <div className="grid grid-cols-2 gap-4">
                         {[
                           { label: "Tests per Day", value: "50+" },
@@ -700,7 +639,7 @@ export default function QualityCertificationPage() {
                       </div>
                     </div>
                     <div>
-                      <div className="aspect-square rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-950/30 dark:to-blue-950/10 flex items-center justify-center">
+                      <div className="aspect-square rounded-2xl bg-linear-to-br from-blue-100 to-blue-50 dark:from-blue-950/30 dark:to-blue-950/10 flex items-center justify-center">
                         <Microscope className="w-32 h-32 text-blue-600/40" />
                       </div>
                     </div>
@@ -768,10 +707,7 @@ export default function QualityCertificationPage() {
                     Traceability System
                   </Badge>
                   <h3 className="text-2xl font-bold text-foreground mb-3">Sistem Ketertelusuran Produk</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Setiap produk memiliki kode batch unik yang memungkinkan kami melacak seluruh proses produksi, 
-                    dari bahan baku hingga distribusi ke konsumen.
-                  </p>
+                  <p className="text-muted-foreground mb-4">Setiap produk memiliki kode batch unik yang memungkinkan kami melacak seluruh proses produksi, dari bahan baku hingga distribusi ke konsumen.</p>
                   <div className="grid md:grid-cols-3 gap-4">
                     {[
                       {
@@ -810,7 +746,7 @@ export default function QualityCertificationPage() {
 
         {/* Customer Assurance */}
         <section>
-          <Card className="bg-gradient-to-r from-emerald-50 to-background dark:from-emerald-950/20">
+          <Card className="bg-linear-to-r from-emerald-50 to-background dark:from-emerald-950/20">
             <CardContent className="p-8">
               <div className="text-center mb-8">
                 <Badge variant="outline" className="mb-4">
@@ -867,9 +803,7 @@ export default function QualityCertificationPage() {
               Documents
             </Badge>
             <h2 className="text-3xl font-bold text-foreground mb-4">Download Dokumen</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Akses dokumen sertifikasi dan laporan kualitas produk kami
-            </p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Akses dokumen sertifikasi dan laporan kualitas produk kami</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -918,9 +852,7 @@ export default function QualityCertificationPage() {
                       <FileText className="w-6 h-6 text-red-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                        {doc.title}
-                      </h4>
+                      <h4 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">{doc.title}</h4>
                       <p className="text-xs text-muted-foreground mb-2">{doc.description}</p>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
@@ -942,26 +874,19 @@ export default function QualityCertificationPage() {
 
         {/* Contact Quality Team */}
         <section>
-          <Card className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground overflow-hidden relative">
+          <Card className="bg-linear-to-r from-primary to-primary/80 text-primary-foreground overflow-hidden relative">
             <div className="absolute inset-0 bg-grid-white/10" />
             <CardContent className="p-12 relative">
               <div className="max-w-3xl mx-auto text-center">
                 <Sparkles className="w-12 h-12 mx-auto mb-4" />
                 <h2 className="text-3xl font-bold mb-3">Ada Pertanyaan tentang Kualitas Produk?</h2>
-                <p className="text-lg text-primary-foreground/90 mb-8">
-                  Tim Quality Assurance kami siap menjawab pertanyaan dan memberikan informasi detail tentang standar kualitas produk
-                </p>
+                <p className="text-lg text-primary-foreground/90 mb-8">Tim Quality Assurance kami siap menjawab pertanyaan dan memberikan informasi detail tentang standar kualitas produk</p>
                 <div className="flex flex-wrap gap-4 justify-center">
                   <Button size="lg" variant="secondary" onClick={() => router.push("/contact")}>
                     <Mail className="w-5 h-5 mr-2" />
                     Hubungi Quality Team
                   </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                    onClick={() => router.push("/products")}
-                  >
+                  <Button size="lg" variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20" onClick={() => router.push("/products")}>
                     <ArrowRight className="w-5 h-5 mr-2" />
                     Lihat Produk Kami
                   </Button>
@@ -980,9 +905,8 @@ export default function QualityCertificationPage() {
                 <div>
                   <h4 className="font-semibold text-foreground mb-2">Komitmen Transparansi</h4>
                   <p className="text-sm text-muted-foreground">
-                    Kami berkomitmen untuk transparan dalam setiap aspek produksi. Semua sertifikasi dan dokumen kualitas kami 
-                    dapat diverifikasi langsung ke lembaga penerbit. Jika Anda memiliki keraguan atau pertanyaan, jangan ragu 
-                    untuk menghubungi tim kami. Kepuasan dan kepercayaan pelanggan adalah prioritas utama kami.
+                    Kami berkomitmen untuk transparan dalam setiap aspek produksi. Semua sertifikasi dan dokumen kualitas kami dapat diverifikasi langsung ke lembaga penerbit. Jika Anda memiliki keraguan atau pertanyaan, jangan ragu untuk
+                    menghubungi tim kami. Kepuasan dan kepercayaan pelanggan adalah prioritas utama kami.
                   </p>
                 </div>
               </div>

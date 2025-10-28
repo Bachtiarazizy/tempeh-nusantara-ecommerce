@@ -116,9 +116,9 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground overflow-hidden">
+      <div className="relative bg-linear-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/50 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-primary/50 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="flex items-center gap-2 text-sm text-primary-foreground/80 mb-4">
@@ -193,7 +193,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <div className="aspect-square rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                 <Factory className="w-32 h-32 text-primary/40" />
               </div>
               <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-primary/10 rounded-2xl -z-10" />
@@ -288,7 +288,7 @@ export default function AboutPage() {
             {team.map((member, index) => (
               <Card key={index} className="hover:shadow-lg transition-all hover:-translate-y-1">
                 <CardContent className="p-6 text-center">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-24 h-24 rounded-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4">
                     <Users className="w-12 h-12 text-primary" />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-1">{member.name}</h3>
@@ -311,7 +311,7 @@ export default function AboutPage() {
             <p className="text-muted-foreground max-w-2xl mx-auto">Produk kami telah memenuhi standar kualitas dan keamanan pangan internasional</p>
           </div>
 
-          <Card className="bg-gradient-to-br from-primary/5 to-background">
+          <Card className="bg-linear-to-br from-primary/5 to-background">
             <CardContent className="p-8">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                 {certifications.map((cert, index) => {
@@ -332,7 +332,7 @@ export default function AboutPage() {
 
         {/* CTA Section */}
         <section>
-          <Card className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground overflow-hidden relative">
+          <Card className="bg-linear-to-r from-primary to-primary/80 text-primary-foreground overflow-hidden relative">
             <div className="absolute inset-0 bg-grid-white/10" />
             <CardContent className="p-12 relative">
               <div className="max-w-3xl mx-auto text-center">

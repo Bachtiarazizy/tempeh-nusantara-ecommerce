@@ -231,9 +231,9 @@ export default function HowToOrderPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground overflow-hidden">
+      <div className="relative bg-linear-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/50 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-primary/50 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex items-center gap-2 text-sm text-primary-foreground/80 mb-4">
@@ -265,7 +265,7 @@ export default function HowToOrderPage() {
           <Card className="overflow-hidden">
             <CardContent className="p-0">
               <div className="grid md:grid-cols-2">
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <div className="aspect-video bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
                       <PlayCircle className="w-10 h-10 text-primary" />
@@ -520,7 +520,7 @@ export default function HowToOrderPage() {
 
         {/* Benefits */}
         <section>
-          <Card className="bg-gradient-to-r from-primary/5 to-background">
+          <Card className="bg-linear-to-r from-primary/5 to-background">
             <CardContent className="p-8">
               <div className="text-center mb-8">
                 <Badge variant="outline" className="mb-4">
@@ -585,7 +585,7 @@ export default function HowToOrderPage() {
 
         {/* CTA */}
         <section>
-          <Card className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground overflow-hidden relative">
+          <Card className="bg-linear-to-r from-primary to-primary/80 text-primary-foreground overflow-hidden relative">
             <div className="absolute inset-0 bg-grid-white/10" />
             <CardContent className="p-12 relative">
               <div className="max-w-3xl mx-auto text-center">
