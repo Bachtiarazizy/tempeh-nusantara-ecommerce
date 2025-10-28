@@ -107,13 +107,17 @@ function ProductsPageContent() {
       const result = await response.json();
 
       if (result.success) {
-        setProducts(result.data.products);
-        setTotalResults(result.data.total);
+        setProducts(result.data.products || []);
+        setTotalResults(result.data.total || 0);
       } else {
+        setProducts([]);
+        setTotalResults(0);
         toast.error("Gagal memuat produk");
       }
     } catch (error) {
       console.error("Error:", error);
+      setProducts([]);
+      setTotalResults(0);
       toast.error("Terjadi kesalahan");
     } finally {
       setLoading(false);
@@ -459,7 +463,7 @@ function ProductsPageContent() {
                   </Card>
                 ))}
               </div>
-            ) : products.length === 0 ? (
+            ) : (products || []).length === 0 ? (
               <Card>
                 <CardContent className="py-16 text-center">
                   <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
@@ -472,7 +476,7 @@ function ProductsPageContent() {
               </Card>
             ) : (
               <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
-                {products.map((product) => (
+                {(products || []).map((product) => (
                   <Card key={product.id} className={`overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group ${viewMode === "list" ? "flex" : ""}`} onClick={() => router.push(`/products/${product.id}`)}>
                     <div className={`${viewMode === "list" ? "w-48 shrink-0" : "aspect-square"} relative`}>
                       {product.image ? (
