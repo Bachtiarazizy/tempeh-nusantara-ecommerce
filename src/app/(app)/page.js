@@ -1,156 +1,359 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Users, TrendingUp, Award, Package, Truck, Shield, Star, ArrowRight, Play, CheckCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  ShoppingCart,
+  Star,
+  TrendingUp,
+  Package,
+  Truck,
+  Shield,
+  Award,
+  Globe,
+  Users,
+  ChevronRight,
+  Play,
+  Check,
+  ArrowRight,
+  Sparkles,
+  Heart,
+  MessageCircle,
+  DollarSign,
+  Target,
+  BarChart3,
+  Gift,
+  Zap,
+  Clock,
+  MapPin,
+  Quote,
+} from "lucide-react";
 import { useState } from "react";
-import FAQSections from "@/components/home-page/faq-section";
+import Image from "next/image";
 
 const LandingPage = () => {
-  const [hoveredFeature, setHoveredFeature] = useState(null);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [email, setEmail] = useState("");
 
-  const features = [
+  // Hero Stats
+  const heroStats = [
+    { value: "50K+", label: "Pelanggan Setia", icon: Users },
+    { value: "100+", label: "Negara Export", icon: Globe },
+    { value: "4.9/5", label: "Rating Produk", icon: Star },
+    { value: "99%", label: "Kepuasan", icon: Heart },
+  ];
+
+  // Featured Products
+  const featuredProducts = [
     {
-      icon: Package,
-      title: "Premium Products",
-      description: "Authentic Indonesian tempeh made with traditional fermentation methods",
-      color: "from-amber-50 to-amber-100",
-      iconColor: "bg-blue-500",
+      id: 1,
+      name: "Tempe Premium Export Quality",
+      category: "premium",
+      price: 45000,
+      originalPrice: 60000,
+      rating: 4.9,
+      reviews: 2847,
+      image: "/products/tempe-premium.jpg",
+      badge: "Best Seller",
+      badgeColor: "bg-yellow-500",
+      sold: "5K+ terjual",
+      discount: 25,
     },
     {
-      icon: Users,
-      title: "Affiliate Program",
-      description: "Join our ranking system and earn competitive commissions",
-      color: "from-amber-50 to-amber-100",
-      iconColor: "bg-green-500",
+      id: 2,
+      name: "Tempe Organik Certified",
+      category: "organic",
+      price: 55000,
+      originalPrice: 70000,
+      rating: 4.8,
+      reviews: 1923,
+      image: "/products/tempe-organic.jpg",
+      badge: "Organic",
+      badgeColor: "bg-green-500",
+      sold: "3K+ terjual",
+      discount: 21,
+    },
+    {
+      id: 3,
+      name: "Tempe Tradisional Authentic",
+      category: "traditional",
+      price: 35000,
+      originalPrice: 45000,
+      rating: 4.9,
+      reviews: 3421,
+      image: "/products/tempe-traditional.jpg",
+      badge: "Popular",
+      badgeColor: "bg-blue-500",
+      sold: "8K+ terjual",
+      discount: 22,
+    },
+    {
+      id: 4,
+      name: "Paket Bulk Order (10kg)",
+      category: "bulk",
+      price: 400000,
+      originalPrice: 550000,
+      rating: 5.0,
+      reviews: 892,
+      image: "/products/tempe-bulk.jpg",
+      badge: "Wholesale",
+      badgeColor: "bg-purple-500",
+      sold: "2K+ terjual",
+      discount: 27,
+    },
+    {
+      id: 5,
+      name: "Tempe Fresh Daily",
+      category: "fresh",
+      price: 30000,
+      rating: 4.7,
+      reviews: 1567,
+      image: "/products/tempe-fresh.jpg",
+      badge: "New",
+      badgeColor: "bg-red-500",
+      sold: "1K+ terjual",
+    },
+    {
+      id: 6,
+      name: "Tempe Spesial Bumbu",
+      category: "special",
+      price: 48000,
+      originalPrice: 60000,
+      rating: 4.8,
+      reviews: 2134,
+      image: "/products/tempe-special.jpg",
+      badge: "Limited",
+      badgeColor: "bg-orange-500",
+      sold: "4K+ terjual",
+      discount: 20,
+    },
+  ];
+
+  // Categories
+  const categories = [
+    { id: "all", name: "Semua Produk", icon: Package },
+    { id: "premium", name: "Premium", icon: Sparkles },
+    { id: "organic", name: "Organik", icon: Award },
+    { id: "traditional", name: "Tradisional", icon: Heart },
+    { id: "bulk", name: "Bulk Order", icon: Gift },
+  ];
+
+  // Features/Benefits
+  const features = [
+    {
+      icon: Shield,
+      title: "Kualitas Terjamin",
+      description: "Sertifikasi Halal MUI, BPOM, dan ISO 9001:2015",
+      color: "bg-blue-500/10 text-blue-500",
     },
     {
       icon: Truck,
-      title: "Global Export",
-      description: "Reliable international shipping with cold chain management",
-      color: "from-amber-50 to-amber-100",
-      iconColor: "bg-purple-500",
+      title: "Pengiriman Cepat",
+      description: "Free ongkir untuk pembelian >100K, 1-3 hari sampai",
+      color: "bg-green-500/10 text-green-500",
     },
     {
-      icon: Shield,
-      title: "Quality Assured",
-      description: "Export-grade certification and food safety standards",
-      color: "from-amber-50 to-amber-100",
-      iconColor: "bg-amber-500",
+      icon: Award,
+      title: "Export Quality",
+      description: "Standar internasional, diekspor ke 100+ negara",
+      color: "bg-yellow-500/10 text-yellow-500",
+    },
+    {
+      icon: DollarSign,
+      title: "Harga Terbaik",
+      description: "Harga pabrik langsung, diskon hingga 40%",
+      color: "bg-purple-500/10 text-purple-500",
     },
   ];
 
-  const stats = [
-    { number: "10+", label: "Product Varieties", icon: Package },
-    { number: "50+", label: "Countries Served", icon: Truck },
-    { number: "1000+", label: "Happy Customers", icon: Users },
-    { number: "5★", label: "Average Rating", icon: Star },
-  ];
-
+  // Testimonials
   const testimonials = [
     {
-      name: "Sarah Mitchell",
-      role: "Health Food Store Owner",
-      location: "California, USA",
-      text: "The quality of tempeh from Tempeh Nusantara is exceptional. My customers love the authentic taste and the wholesale program makes it profitable for my business.",
+      name: "Ibu Sarah Wijaya",
+      role: "Restoran Owner",
+      avatar: "/avatars/avatar1.jpg",
       rating: 5,
+      comment: "Kualitas tempe sangat bagus dan konsisten! Pelanggan saya selalu puas. Sudah order berkali-kali dan tidak pernah mengecewakan.",
+      location: "Jakarta",
     },
     {
-      name: "Marcus Chen",
-      role: "Affiliate Partner",
+      name: "Bapak Ahmad Reza",
+      role: "Distributor",
+      avatar: "/avatars/avatar2.jpg",
+      rating: 5,
+      comment: "Sebagai distributor, saya sangat terbantu dengan sistem bulk order mereka. Harga kompetitif dan kualitas export. Recommended!",
+      location: "Surabaya",
+    },
+    {
+      name: "Ms. Jennifer Kim",
+      role: "International Buyer",
+      avatar: "/avatars/avatar3.jpg",
+      rating: 5,
+      comment: "Best Indonesian tempeh supplier! Quality is consistent and they handle international shipping very professionally.",
       location: "Singapore",
-      text: "The affiliate program with ranking system is motivating. I've been able to build a steady income stream while promoting products I genuinely believe in.",
-      rating: 5,
-    },
-    {
-      name: "Emma Rodriguez",
-      role: "Restaurant Chef",
-      location: "Mexico City, Mexico",
-      text: "Using their tempeh in our plant-based menu has been a game-changer. The consistency and flavor profile is perfect for our dishes.",
-      rating: 5,
     },
   ];
 
+  // Affiliate Benefits
+  const affiliateBenefits = [
+    {
+      icon: DollarSign,
+      title: "Komisi hingga 25%",
+      description: "Dapatkan komisi menarik dari setiap penjualan",
+    },
+    {
+      icon: Target,
+      title: "Goal-Based Rewards",
+      description: "Bonus tambahan saat capai target bulanan",
+    },
+    {
+      icon: BarChart3,
+      title: "Dashboard Real-time",
+      description: "Pantau performa dan earnings langsung",
+    },
+    {
+      icon: Award,
+      title: "Leaderboard Ranking",
+      description: "Kompetisi sehat dengan reward menarik",
+    },
+  ];
+
+  // Process Steps
+  const processSteps = [
+    {
+      number: "01",
+      title: "Pilih Produk",
+      description: "Browse katalog lengkap produk premium kami",
+    },
+    {
+      number: "02",
+      title: "Tambah ke Keranjang",
+      description: "Pilih varian dan jumlah yang diinginkan",
+    },
+    {
+      number: "03",
+      title: "Checkout Aman",
+      description: "Pembayaran mudah dengan berbagai metode",
+    },
+    {
+      number: "04",
+      title: "Terima Pesanan",
+      description: "Pengiriman cepat langsung ke alamat Anda",
+    },
+  ];
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const filteredProducts = activeCategory === "all" ? featuredProducts : featuredProducts.filter((p) => p.category === activeCategory);
+
   return (
-    <div className="min-h-screen bg-secondary text-primary">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section
-        className="relative bg-primary text-secondary overflow-hidden"
-        style={{
-          backgroundImage: 'bg-linear(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)), url("/images/hero-image.png")',
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <div className="inline-flex items-center px-4 py-2 bg-secondary bg-opacity-20 rounded-full backdrop-blur-sm mb-6">
-              <Award className="w-5 h-5 mr-2 text-primary" />
-              <span className="text-sm text-primary font-medium">Premium Indonesian Tempeh</span>
+      <section className="relative bg-gradient-to-br from-primary/5 via-background to-primary/5 overflow-hidden">
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
+                <Sparkles className="w-4 h-4" />
+                #1 Produsen Tempe Premium Indonesia
+              </div>
+
+              <div className="space-y-4">
+                <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
+                  Tempe Premium
+                  <span className="block text-primary">Export Quality</span>
+                </h1>
+                <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">Kualitas internasional dengan cita rasa tradisional Indonesia. Dipercaya oleh ribuan pelanggan di 100+ negara.</p>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-4">
+                <Button size="lg" className="h-12 px-8 text-base group">
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Belanja Sekarang
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                  <Play className="w-5 h-5 mr-2" />
+                  Lihat Video
+                </Button>
+              </div>
+
+              {/* Hero Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8">
+                {heroStats.map((stat, index) => (
+                  <div key={index} className="text-center">
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-2">
+                      <stat.icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Export Quality
-              <br />
-              <span className="">Tempeh</span> Worldwide
-            </h1>
-
-            <p className="text-base md:text-medium text-secondary/80 max-w-3xl mx-auto leading-relaxed mb-10">
-              Discover authentic Indonesian tempeh crafted with traditional methods. Join our global network of customers and affiliates in bringing premium plant-based protein to the world.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg">
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                Shop Products
-              </Button>
-              <Button size="lg" className="border border-secondary bg-transparent text-secondary hover:bg-secondary hover:text-primary">
-                <Users className="w-5 h-5 mr-2" />
-                Join Affiliate Program
-              </Button>
-            </div>
-
-            {/* Hero Stats */}
-            {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-lg">
-                  <stat.icon className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-secondary">{stat.number}</div>
-                  <div className="text-sm text-secondary/70">{stat.label}</div>
+            {/* Right Image */}
+            <div className="relative">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <div className="aspect-[4/5] bg-gradient-to-br from-primary/20 to-blue-500/20 flex items-center justify-center relative overflow-hidden">
+                  <Image src="/images/tempeh-premium.png" alt="Tempe Premium Nusantara" fill className="object-cover" priority />
                 </div>
-              ))}
-            </div> */}
+
+                {/* Floating Cards */}
+                <div className="absolute top-8 -left-4 bg-card border shadow-lg rounded-lg p-4 animate-float">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center">
+                      <Check className="w-5 h-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">2,847 Orders</p>
+                      <p className="text-xs text-muted-foreground">Hari ini</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-8 -right-4 bg-card border shadow-lg rounded-lg p-4 animate-float-delayed">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-yellow-500/10 rounded-full flex items-center justify-center">
+                      <Star className="w-5 h-5 text-yellow-500" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">4.9/5 Rating</p>
+                      <p className="text-xs text-muted-foreground">12,341 reviews</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white">
+      <section className="py-16 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge className="bg-green-100 text-green-800 mb-4">Why Choose Us</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">Built for Global Success</h2>
-            <p className="text-lg text-primary/70 max-w-3xl mx-auto">From premium products to affiliate opportunities, we provide everything you need to succeed in the plant-based market</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <Card
-                key={index}
-                className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer ${hoveredFeature === index ? "scale-105" : ""}`}
-                onMouseEnter={() => setHoveredFeature(index)}
-                onMouseLeave={() => setHoveredFeature(null)}
-              >
-                <CardContent className={`p-6 bg-linear-to-br ${feature.color} border-0`}>
-                  <div className={`w-12 h-12 ${feature.iconColor} rounded-lg flex items-center justify-center mb-4`}>
-                    <feature.icon className="w-6 h-6 text-white" />
+              <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${feature.color} mb-4`}>
+                    <feature.icon className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-primary mb-2">{feature.title}</h3>
-                  <p className="text-sm text-primary/70 leading-relaxed">{feature.description}</p>
-                  <ArrowRight className={`w-4 h-4 mt-4 text-primary/40 transition-transform duration-300 ${hoveredFeature === index ? "translate-x-2" : ""}`} />
+                  <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -158,213 +361,163 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Product Showcase */}
-      <section className="py-20 bg-linear-to-br from-slate-50 to-green-50">
+      {/* Featured Products Section */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <Badge className="bg-green-100 text-green-800 mb-4">Our Products</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Authentic Indonesian Tempeh</h2>
-              <p className="text-lg text-primary/70 mb-8">
-                Made from the finest non-GMO soybeans using traditional fermentation methods passed down through generations. Each batch is crafted with care to deliver authentic taste and superior nutrition.
-              </p>
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <Badge className="mb-4">Produk Unggulan</Badge>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Tempe Premium Pilihan</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Dipilih dengan standar kualitas tertinggi untuk kepuasan Anda</p>
+          </div>
 
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                  <span className="text-primary">100% Natural Fermentation Process</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                  <span className="text-primary">Non-GMO Certified Soybeans</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                  <span className="text-primary">Export Quality Standards</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                  <span className="text-primary">Multiple Variety Options</span>
-                </div>
-              </div>
+          {/* Category Filter */}
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
+            {categories.map((category) => (
+              <Button key={category.id} variant={activeCategory === category.id ? "default" : "outline"} size="sm" onClick={() => setActiveCategory(category.id)} className="gap-2">
+                <category.icon className="w-4 h-4" />
+                {category.name}
+              </Button>
+            ))}
+          </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-primary hover:bg-primary/90">
-                  <Package className="w-5 h-5 mr-2" />
-                  View All Products
-                </Button>
-                <Button size="lg" variant="outline">
-                  Request Samples
-                </Button>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="bg-linear-to-br from-green-100 to-green-200 rounded-2xl p-8">
-                <div className="grid grid-cols-2 gap-4">
-                  <Card className="p-4">
-                    <div className="w-full h-32 bg-linear-to-br from-amber-100 to-orange-200 rounded-lg flex items-center justify-center mb-3">
-                      <Package className="w-8 h-8 text-primary" />
+          {/* Products Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {filteredProducts.map((product) => (
+              <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-0">
+                <CardContent className="p-0">
+                  {/* Product Image */}
+                  <div className="relative aspect-square bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Package className="w-24 h-24 text-muted-foreground/20" />
                     </div>
-                    <h4 className="font-semibold text-primary text-sm">Raw Tempeh</h4>
-                    <p className="text-xs text-primary/60">Original Flavor</p>
-                  </Card>
 
-                  <Card className="p-4">
-                    <div className="w-full h-32 bg-linear-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center mb-3">
-                      <Package className="w-8 h-8 text-primary" />
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 flex flex-col gap-2">
+                      <Badge className={`${product.badgeColor} text-white border-0`}>{product.badge}</Badge>
+                      {product.discount && <Badge className="bg-red-500 text-white border-0">-{product.discount}%</Badge>}
                     </div>
-                    <h4 className="font-semibold text-primary text-sm">Marinated</h4>
-                    <p className="text-xs text-primary/60">Ready to Cook</p>
-                  </Card>
 
-                  <Card className="p-4">
-                    <div className="w-full h-32 bg-linear-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center mb-3">
-                      <Package className="w-8 h-8 text-primary" />
+                    {/* Quick Actions */}
+                    <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full shadow-lg">
+                        <Heart className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <h4 className="font-semibold text-primary text-sm">Organic</h4>
-                    <p className="text-xs text-primary/60">Certified</p>
-                  </Card>
 
-                  <Card className="p-4">
-                    <div className="w-full h-32 bg-linear-to-br from-red-100 to-red-200 rounded-lg flex items-center justify-center mb-3">
-                      <Package className="w-8 h-8 text-primary" />
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Button className="gap-2">
+                        <ShoppingCart className="w-4 h-4" />
+                        Tambah ke Keranjang
+                      </Button>
                     </div>
-                    <h4 className="font-semibold text-primary text-sm">Spiced</h4>
-                    <p className="text-xs text-primary/60">Traditional</p>
-                  </Card>
-                </div>
-              </div>
-            </div>
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="p-5">
+                    <h3 className="font-semibold text-lg mb-2 line-clamp-1 group-hover:text-primary transition-colors">{product.name}</h3>
+
+                    {/* Rating & Sold */}
+                    <div className="flex items-center gap-3 mb-3 text-sm">
+                      <div className="flex items-center gap-1 text-yellow-500">
+                        <Star className="w-4 h-4 fill-current" />
+                        <span className="font-semibold">{product.rating}</span>
+                        <span className="text-muted-foreground">({product.reviews})</span>
+                      </div>
+                      <span className="text-muted-foreground">• {product.sold}</span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-2xl font-bold text-primary">{formatPrice(product.price)}</p>
+                        {product.originalPrice && <p className="text-sm text-muted-foreground line-through">{formatPrice(product.originalPrice)}</p>}
+                      </div>
+                      <Button size="icon" className="h-10 w-10 rounded-full">
+                        <ShoppingCart className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* View All Button */}
+          <div className="text-center">
+            <Button size="lg" variant="outline" className="gap-2">
+              Lihat Semua Produk
+              <ArrowRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Affiliate Program */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="order-2 lg:order-1">
-              <div className="bg-linear-to-br from-blue-100 to-indigo-200 rounded-2xl p-8">
-                <Card className="p-6 mb-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-primary">Monthly Leaderboard</h4>
-                    <TrendingUp className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-linear-to-r from-yellow-50 to-yellow-100 rounded-lg">
-                      <div className="flex items-center">
-                        <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">1</div>
-                        <span className="font-medium text-primary">Alex Johnson</span>
-                      </div>
-                      <span className="text-green-600 font-bold">$2,450</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-linear-to-r from-gray-50 to-gray-100 rounded-lg">
-                      <div className="flex items-center">
-                        <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">2</div>
-                        <span className="font-medium text-primary">Maria Garcia</span>
-                      </div>
-                      <span className="text-green-600 font-bold">$1,890</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-linear-to-r from-orange-50 to-orange-100 rounded-lg">
-                      <div className="flex items-center">
-                        <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">3</div>
-                        <span className="font-medium text-primary">David Kim</span>
-                      </div>
-                      <span className="text-green-600 font-bold">$1,620</span>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </div>
-
-            <div className="order-1 lg:order-2">
-              <Badge className="bg-green-100 text-green-800 mb-4">Affiliate Program</Badge>
-
-              <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Join Our Ranking System & Earn</h2>
-              <p className="text-lg text-primary/70 mb-8">
-                Become part of our competitive affiliate program with transparent ranking system. Earn commissions, compete with others, and build your income stream while promoting premium tempeh products.
-              </p>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex items-start">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4 mt-1">
-                    <span className="text-primary font-bold text-sm">1</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-primary mb-1">Register & Get Approved</h4>
-                    <p className="text-primary/60 text-sm">Quick registration with admin approval process</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4 mt-1">
-                    <span className="text-primary font-bold text-sm">2</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-primary mb-1">Get Your Unique Link</h4>
-                    <p className="text-primary/60 text-sm">Receive your personalized referral URL</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4 mt-1">
-                    <span className="text-primary font-bold text-sm">3</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-primary mb-1">Track & Compete</h4>
-                    <p className="text-primary/60 text-sm">Monitor your progress and climb the leaderboard</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-4 mt-1">
-                    <span className="text-primary font-bold text-sm">4</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-primary mb-1">Earn Commissions</h4>
-                    <p className="text-primary/60 text-sm">Receive monthly payouts based on performance</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg">
-                  <Users className="w-5 h-5 mr-2" />
-                  Become Affiliate
-                </Button>
-                <Button size="lg" variant="outline">
-                  View Leaderboard
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 bg-linear-to-br from-slate-50 to-blue-50">
+      {/* How It Works Section */}
+      <section className="py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge className="bg-green-100 text-green-800 mb-4">Testimonials</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">What Our Partners Say</h2>
-            <p className="text-base md:text-medium text-primary/70 max-w-3xl mx-auto">From wholesalers to affiliates, hear from our global network of satisfied partners</p>
+            <Badge className="mb-4">Cara Belanja</Badge>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Mudah & Cepat</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Proses pemesanan yang simpel dalam 4 langkah mudah</p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8">
+            {processSteps.map((step, index) => (
+              <div key={index} className="relative">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 relative">
+                    <span className="text-2xl font-bold text-primary">{step.number}</span>
+                    {index < processSteps.length - 1 && <ChevronRight className="w-6 h-6 text-primary/30 absolute -right-8 top-5 hidden md:block" />}
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="mb-4">Testimoni</Badge>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Kata Pelanggan Kami</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Kepuasan pelanggan adalah prioritas utama kami</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="p-6 hover:shadow-lg transition-shadow duration-300">
-                <CardContent className="p-0">
-                  <div className="flex mb-4">
+              <Card key={index} className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <Quote className="w-10 h-10 text-primary/20 mb-4" />
+
+                  {/* Rating */}
+                  <div className="flex gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
                     ))}
                   </div>
-                  <p className="text-primary/70 mb-6 leading-relaxed">"{testimonial.text}"</p>
-                  <div>
-                    <h4 className="font-semibold text-primary">{testimonial.name}</h4>
-                    <p className="text-sm text-primary/60">{testimonial.role}</p>
-                    <p className="text-xs text-primary/50">{testimonial.location}</p>
+
+                  {/* Comment */}
+                  <p className="text-muted-foreground mb-6 leading-relaxed">"{testimonial.comment}"</p>
+
+                  {/* Author */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold">{testimonial.name.charAt(0)}</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold">{testimonial.name}</p>
+                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                        <MapPin className="w-3 h-3" />
+                        {testimonial.location}
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -373,56 +526,164 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-secondary">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Start Your Journey?</h2>
-          <p className="text-lg mb-8 opacity-90 max-w-3xl mx-auto">Whether you're looking for premium tempeh products or want to join our affiliate program, we're here to support your success in the plant-based market.</p>
+      {/* Affiliate CTA Section */}
+      <section className="py-20 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div>
+              <Badge className="bg-white/20 text-white border-0 mb-4">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Affiliate Program
+              </Badge>
+              <h2 className="text-3xl lg:text-5xl font-bold mb-6">Hasilkan Hingga 25% Komisi!</h2>
+              <p className="text-primary-foreground/90 text-lg mb-8 leading-relaxed">Bergabunglah dengan ribuan affiliate kami dan dapatkan penghasilan pasif. Sistem tracking real-time, payout cepat, dan support penuh dari tim kami.</p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-primary">
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              Shop Now
-            </Button>
-            <Button size="lg" className="border border-secondary text-secondary hover:bg-secondary hover:text-primary">
-              <Users className="w-5 h-5 mr-2" />
-              Join Affiliate Program
-            </Button>
-            <Button size="lg" className="border border-secondary text-secondary hover:bg-secondary hover:text-primary">
-              <Package className="w-5 h-5 mr-2" />
-              Wholesale Inquiry
-            </Button>
-          </div>
+              <div className="flex flex-wrap gap-4 mb-8">
+                <Button size="lg" variant="secondary" className="h-12 px-8 gap-2">
+                  <Users className="w-5 h-5" />
+                  Daftar Sekarang Gratis
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+                <Button size="lg" variant="outline" className="h-12 px-8 border-white text-white hover:bg-white/10">
+                  Pelajari Lebih Lanjut
+                </Button>
+              </div>
 
-          <div className="grid md:grid-cols-3 gap-6 text-sm">
-            <div className="flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
-              <span>Free shipping over $50</span>
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-6">
+                <div>
+                  <p className="text-3xl font-bold mb-1">5,000+</p>
+                  <p className="text-sm text-primary-foreground/80">Active Affiliates</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold mb-1">$2M+</p>
+                  <p className="text-sm text-primary-foreground/80">Total Earnings</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold mb-1">25%</p>
+                  <p className="text-sm text-primary-foreground/80">Max Commission</p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
-              <span>Global export capability</span>
-            </div>
-            <div className="flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
-              <span>24/7 support available</span>
+
+            {/* Right Benefits */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              {affiliateBenefits.map((benefit, index) => (
+                <div key={index} className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4">
+                    <benefit.icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">{benefit.title}</h3>
+                  <p className="text-sm text-primary-foreground/80">{benefit.description}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <FAQSections />
+      {/* Newsletter Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-card rounded-2xl p-12 shadow-xl border">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
+              <Zap className="w-8 h-8 text-primary" />
+            </div>
 
-      {/* Back to Top */}
-      <button
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-8 right-8 bg-primary hover:bg-secondary text-secondary hover:text-primary p-4 rounded-full shadow-lg transition-all duration-200 transform hover:scale-110 hover:shadow-xl"
-        aria-label="Back to top"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-        </svg>
-      </button>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Dapatkan Penawaran Eksklusif</h2>
+            <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">Berlangganan newsletter kami dan dapatkan diskon 15% untuk pembelian pertama, plus update produk terbaru dan promo spesial.</p>
+
+            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Masukkan email Anda"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+              <Button size="lg" className="gap-2 whitespace-nowrap">
+                Berlangganan
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </form>
+
+            <p className="text-xs text-muted-foreground mt-4">
+              Dengan berlangganan, Anda menyetujui{" "}
+              <a href="/privacy" className="underline hover:text-primary">
+                Privacy Policy
+              </a>{" "}
+              kami
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Badges Footer */}
+      <section className="py-12 border-t">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">SSL Secure Payment</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Award className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">ISO 9001:2015</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">Export Quality</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">24/7 Support</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">Fast Response</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CSS for Animations */}
+      <style jsx>{`
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        @keyframes float-delayed {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-float-delayed {
+          animation: float-delayed 3s ease-in-out infinite;
+          animation-delay: 1.5s;
+        }
+
+        .bg-grid-pattern {
+          background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+          background-size: 40px 40px;
+        }
+      `}</style>
     </div>
   );
 };
