@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -13,8 +10,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-
 
 // ============================================
 // ENUM DEFINITIONS
@@ -52,15 +47,77 @@ enum OrderStatus {
 enum PaymentStatus {
   UNPAID
   PAID
+  PENDING
+  EXPIRED
   FAILED
   REFUNDED
 }
 
+// Xendit Payment Methods
 enum PaymentMethod {
-  BANK_TRANSFER
-  COD
-  EWALLET
+  BANK_TRANSFER        // Virtual Account
+  COD                  // Cash on Delivery (kept for backward compatibility)
+  EWALLET              // E-Wallet (OVO, Dana, LinkAja, ShopeePay)
+  CREDIT_CARD          // Kartu Kredit/Debit (Lokal & International)
+  QRIS                 // QRIS
+  RETAIL_OUTLET        // Alfamart, Indomaret
+  CARDLESS_CREDIT      // Kredivo, Akulaku
+  DIRECT_DEBIT         // Direct Debit
+  PAYLATER             // Pay Later
+}
+
+// Xendit Payment Channels
+enum PaymentChannel {
+  // Credit Card
   CREDIT_CARD
+  
+  // Virtual Account Banks
+  BCA
+  BNI
+  BRI
+  MANDIRI
+  PERMATA
+  BSI
+  BJB
+  CIMB
+  SAHABAT_SAMPOERNA
+  
+  // E-Wallets
+  OVO
+  DANA
+  LINKAJA
+  SHOPEEPAY
+  ASTRAPAY
+  JENIUSPAY
+  
+  // QRIS
+  QRIS
+  
+  // Retail
+  ALFAMART
+  INDOMARET
+  
+  // Cardless Credit
+  KREDIVO
+  AKULAKU
+  UANGME
+  
+  // Direct Debit
+  DD_BRI
+  DD_BCA_KLIKPAY
+  
+  // International Cards
+  VISA
+  MASTERCARD
+  JCB
+  AMEX
+}
+
+enum XenditInvoiceStatus {
+  PENDING
+  PAID
+  SETTLED
+  EXPIRED
 }
 
 enum CommissionStatus {
@@ -78,6 +135,9 @@ enum NotificationType {
   COMMISSION_EARNED
   COMMISSION_PAID
   AFFILIATE_APPROVED
+  PAYMENT_PENDING
+  PAYMENT_EXPIRED
+  PAYMENT_FAILED
 }
 
 enum SettingType {
@@ -119,9 +179,9 @@ model User {
 
   // Relations
   affiliate     Affiliate?
-  orders        Order[]
   addresses     Address[]
-  cart          Cart?
+  orders        Order[]
+  carts         Cart[]
   wishlist      Wishlist?
   notifications Notification[]
   materialDownloads MaterialDownload[]
@@ -154,17 +214,17 @@ model Affiliate {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
-  // Bank Info
+  // Bank Info for Payout
   bankName        String?
   accountNumber   String?
   accountName     String?
 
   // Relations
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orders          Order[]
-  clicks          AffiliateClick[]
-  commissions     Commission[]
-  payouts         Payout[]
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders            Order[]
+  clicks            AffiliateClick[]
+  commissions       Commission[]
+  payouts           Payout[]
   materialDownloads MaterialDownload[]
 
   @@index([referralCode])
@@ -222,45 +282,6 @@ model Product {
 }
 
 // ============================================
-// CART MANAGEMENT
-// ============================================
-
-model Cart {
-  id        String     @id @default(cuid())
-  userId    String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     CartItem[]
-
-  @@map("carts")
-}
-
-model CartItem {
-  id          String   @id @default(cuid())
-  cartId      String
-  productId   String
-  productSku  String
-  quantity    Int      @default(1)
-  productName String
-  price       Decimal
-  image       String?
-  variant     String?
-  weight      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  cart        Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([cartId, productId, variant, weight])
-  @@index([cartId])
-  @@index([productId])
-  @@map("cart_items")
-}
-
-// ============================================
 // WISHLIST MANAGEMENT
 // ============================================
 
@@ -296,76 +317,13 @@ model WishlistItem {
 }
 
 // ============================================
-// ORDER MANAGEMENT
-// ============================================
-
-model Order {
-  id                String        @id @default(cuid())
-  orderNumber       String        @unique
-  userId            String
-  affiliateId       String?
-  status            OrderStatus   @default(PENDING)
-  paymentStatus     PaymentStatus @default(UNPAID)
-  paymentMethod     PaymentMethod
-  subtotal          Decimal
-  shippingCost      Decimal
-  discount          Decimal       @default(0)
-  total             Decimal
-  affiliateCommission Decimal     @default(0)
-  commissionPaid    Boolean       @default(false)
-  shippingName      String
-  shippingPhone     String
-  shippingAddress   String        @db.Text
-  shippingCity      String
-  shippingProvince  String
-  shippingPostalCode String
-  trackingNumber    String?
-  shippedAt         DateTime?
-  deliveredAt       DateTime?
-  paymentProof      String?
-  paidAt            DateTime?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  affiliate   Affiliate? @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
-  items       OrderItem[]
-  commission  Commission?
-
-  @@index([userId])
-  @@index([affiliateId])
-  @@index([status])
-  @@index([orderNumber])
-  @@index([createdAt])
-  @@map("orders")
-}
-
-model OrderItem {
-  id          String   @id @default(cuid())
-  orderId     String
-  productId   String
-  productName String
-  productSku  String
-  price       Decimal
-  quantity    Int
-  subtotal    Decimal
-  createdAt   DateTime @default(now())
-
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@index([orderId])
-  @@map("order_items")
-}
-
-// ============================================
 // COMMISSION & PAYOUT MANAGEMENT
 // ============================================
 
 model Commission {
   id              String           @id @default(cuid())
   affiliateId     String
-  orderId         String           @unique
+  orderId         String?
   amount          Decimal
   status          CommissionStatus @default(PENDING)
   approvedAt      DateTime?
@@ -376,11 +334,13 @@ model Commission {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
+  // Relations
   affiliate       Affiliate        @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
-  order           Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order           Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   @@index([affiliateId, status])
   @@index([status])
+  @@index([orderId])
   @@map("commissions")
 }
 
@@ -405,24 +365,231 @@ model Payout {
 // ============================================
 
 model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  fullName   String
+  phone      String
+  address    String
+  city       String
+  state      String
+  postalCode String
+  country    String   @default("Indonesia")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model ShippingMethod {
+  id             String   @id @default(cuid())
+  name           String   @unique
+  description    String?
+  price          Decimal  @db.Decimal(10, 2)
+  estimatedDays  Int
+  minOrderAmount Decimal? @db.Decimal(10, 2)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  orders         Order[]
+
+  @@map("shipping_methods")
+}
+
+// ============================================
+// ORDER MANAGEMENT (XENDIT INTEGRATION)
+// ============================================
+
+model Order {
+  id                String         @id @default(cuid())
+  orderNumber       String         @unique
+  userId            String
+  affiliateId       String?
+  status            OrderStatus    @default(PENDING)
+  paymentStatus     PaymentStatus  @default(UNPAID)
+  
+  // Xendit Payment Info
+  xenditInvoiceId   String?        @unique  // ID Invoice dari Xendit
+  xenditInvoiceUrl  String?                  // URL pembayaran untuk customer
+  xenditExternalId  String?        @unique  // External ID (biasanya orderNumber)
+  paymentMethod     PaymentMethod?           // Metode pembayaran yang dipilih
+  paymentChannel    PaymentChannel?          // Channel spesifik (BCA, OVO, dll)
+  
+  // Order Details
+  subtotal          Decimal        @db.Decimal(10, 2)
+  shippingCost      Decimal        @db.Decimal(10, 2)
+  tax               Decimal        @db.Decimal(10, 2)
+  total             Decimal        @db.Decimal(10, 2)
+  currency          String         @default("IDR")
+  
+  // Shipping Info
+  shippingMethodId  String
+  shippingAddress   String         @db.Text
+  trackingNumber    String?
+  
+  // Additional Info
+  notes             String?        @db.Text
+  customerEmail     String?
+  customerPhone     String?
+  
+  // Timestamps
+  paidAt            DateTime?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  cancelledAt       DateTime?
+  expiredAt         DateTime?      // Untuk payment expiry
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // Relations
+  user              User           @relation(fields: [userId], references: [id])
+  affiliate         Affiliate?     @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+  shippingMethod    ShippingMethod @relation(fields: [shippingMethodId], references: [id])
+  items             OrderItem[]
+  commissions       Commission[]
+  payments          Payment[]
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([affiliateId])
+  @@index([xenditInvoiceId])
+  @@index([xenditExternalId])
+  @@map("orders")
+}
+
+model OrderItem {
   id          String   @id @default(cuid())
-  userId      String
-  label       String
-  name        String
-  phone       String
-  address     String   @db.Text
-  city        String
-  province    String
-  postalCode  String
-  isDefault   Boolean  @default(false)
+  orderId     String
+  productId   String
+  productName String
+  productSku  String
+  price       Decimal  @db.Decimal(10, 2)
+  quantity    Int
+  variant     String?
+  weight      String?
+  subtotal    Decimal  @db.Decimal(10, 2)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id])
 
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// ============================================
+// PAYMENT TRACKING (XENDIT)
+// ============================================
+
+model Payment {
+  id                  String        @id @default(cuid())
+  orderId             String
+  
+  // Xendit Payment Details
+  xenditInvoiceId     String        @unique
+  xenditPaymentId     String?       @unique  // ID dari payment callback
+  xenditExternalId    String
+  
+  // Payment Info
+  amount              Decimal       @db.Decimal(10, 2)
+  currency            String        @default("IDR")
+  paymentMethod       PaymentMethod
+  paymentChannel      PaymentChannel?
+  status              PaymentStatus @default(PENDING)
+  
+  // Transaction Details
+  paidAmount          Decimal?      @db.Decimal(10, 2)
+  payerEmail          String?
+  paymentDestination  String?       // VA number, QRIS merchant, dll
+  
+  // Fee Information
+  xenditFee           Decimal?      @db.Decimal(10, 2)
+  
+  // Callback Data
+  callbackData        Json?         // Raw callback dari Xendit
+  failureReason       String?
+  
+  // Timestamps
+  paidAt              DateTime?
+  expiredAt           DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  // Relations
+  order               Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([xenditInvoiceId])
+  @@index([xenditPaymentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+// ============================================
+// XENDIT WEBHOOK LOG
+// ============================================
+
+model XenditWebhookLog {
+  id              String   @id @default(cuid())
+  event           String   // invoice.paid, invoice.expired, dll
+  xenditInvoiceId String?
+  payload         Json     // Full webhook payload
+  processed       Boolean  @default(false)
+  processedAt     DateTime?
+  errorMessage    String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  @@index([xenditInvoiceId])
+  @@index([processed])
+  @@index([createdAt])
+  @@map("xendit_webhook_logs")
+}
+
+// ============================================
+// CART MANAGEMENT
+// ============================================
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String
+  status    String     @default("ACTIVE")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+
+  @@unique([userId, status])
   @@index([userId])
-  @@index([userId, isDefault])
-  @@map("addresses")
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  variant   String?
+  weight    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId, variant, weight])
+  @@index([cartId])
+  @@index([productId])
+  @@map("cart_items")
 }
 
 // ============================================
@@ -441,7 +608,7 @@ model Setting {
 }
 
 // ============================================
-// BLOG / CMS (REFERENCE)
+// BLOG / CMS
 // ============================================
 
 model BlogPost {
@@ -482,47 +649,36 @@ model Notification {
   @@map("notifications")
 }
 
+// ============================================
+// MARKETING MATERIALS
+// ============================================
+
 model MarketingMaterial {
-  id          String         @id @default(cuid())
-  type        MaterialType
-  status      MaterialStatus @default(ACTIVE)
-  
-  // Basic Info
-  title       String
-  slug        String         @unique
-  description String?
-  category    String?        // e.g., "Social Media", "Email", "WhatsApp"
-  
-  // File Info
-  fileUrl     String?
-  thumbnailUrl String?
-  fileSize    Int?           // in bytes
-  fileFormat  String?        // JPG, PNG, MP4, PDF, etc
-  
-  // Dimensions (for images/videos)
-  width       Int?
-  height      Int?
-  duration    Int?           // in seconds for videos
-  
-  // Content (for copywriting)
-  content     String?        @db.Text
-  
-  // Additional metadata
-  tags        String[]       @default([])
-  sortOrder   Int            @default(0)
-  
-  // Stats
-  downloadCount Int          @default(0)
-  viewCount     Int          @default(0)
-  
-  // Tracking
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  publishedAt DateTime?
-  
-  // Relations
-  downloads   MaterialDownload[]
-  
+  id            String         @id @default(cuid())
+  type          MaterialType
+  status        MaterialStatus @default(ACTIVE)
+  title         String
+  slug          String         @unique
+  description   String?
+  category      String?
+  fileUrl       String?
+  thumbnailUrl  String?
+  fileSize      Int?
+  fileFormat    String?
+  width         Int?
+  height        Int?
+  duration      Int?
+  content       String?        @db.Text
+  tags          String[]       @default([])
+  sortOrder     Int            @default(0)
+  downloadCount Int            @default(0)
+  viewCount     Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  publishedAt   DateTime?
+
+  downloads     MaterialDownload[]
+
   @@index([type, status])
   @@index([slug])
   @@index([publishedAt])
@@ -530,21 +686,18 @@ model MarketingMaterial {
 }
 
 model MaterialDownload {
-  id          String            @id @default(cuid())
-  materialId  String
-  userId      String
-  affiliateId String?
-  
-  ipAddress   String?
-  userAgent   String?
-  
-  downloadedAt DateTime         @default(now())
-  
-  // Relations
-  material    MarketingMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  affiliate   Affiliate?        @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
-  
+  id           String            @id @default(cuid())
+  materialId   String
+  userId       String
+  affiliateId  String?
+  ipAddress    String?
+  userAgent    String?
+  downloadedAt DateTime          @default(now())
+
+  material     MarketingMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  affiliate    Affiliate?        @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+
   @@index([materialId])
   @@index([userId])
   @@index([affiliateId])

@@ -1,8 +1,7 @@
 // src/app/(app)/layout.js
 
 import Footer from "@/components/layout/footer";
-import Navbar from "@/components/layout/navbar";
-import { CartProvider } from "@/components/shared/cart-context";
+import Navbar from "@/components/layout/navbar/navbar";
 
 export const metadata = {
   title: "Tempeh Nusantara",
@@ -13,11 +12,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="antialiased">
-        <CartProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-        </CartProvider>
+        <Navbar />
+        <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

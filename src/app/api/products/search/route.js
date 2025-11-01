@@ -1,5 +1,4 @@
-// app/api/products/route.js
-
+// app/api/products/search/route.js
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
@@ -16,14 +15,13 @@ export async function GET(request) {
     const maxPrice = parseFloat(searchParams.get("maxPrice") || "999999999");
     const inStock = searchParams.get("inStock") === "true";
     const minRating = parseFloat(searchParams.get("minRating") || "0");
-    const onSale = searchParams.get("onSale") === "true";
     const sortBy = searchParams.get("sort") || "relevance";
 
     const skip = (page - 1) * limit;
 
     // Build where conditions
     const where = {
-      status: "ACTIVE", // Only show active products
+      status: "ACTIVE",
       ...(search && {
         OR: [{ name: { contains: search, mode: "insensitive" } }, { description: { contains: search, mode: "insensitive" } }, { sku: { contains: search, mode: "insensitive" } }],
       }),
@@ -37,41 +35,35 @@ export async function GET(request) {
       ...(inStock && {
         stock: { gt: 0 },
       }),
-      ...(onSale && {
-        comparePrice: { not: null },
-      }),
     };
 
-    // Determine sort order - MUST BE AN ARRAY
-    let orderBy = [];
+    // Determine sort order
+    let orderBy = {};
     switch (sortBy) {
       case "price-low":
-        orderBy = [{ price: "asc" }];
+        orderBy = { price: "asc" };
         break;
       case "price-high":
-        orderBy = [{ price: "desc" }];
+        orderBy = { price: "desc" };
         break;
       case "newest":
-        orderBy = [{ createdAt: "desc" }];
+        orderBy = { createdAt: "desc" };
         break;
       case "popular":
-      case "best-sellers":
-        // We'll use order count as popularity metric
-        orderBy = [{ orderItems: { _count: "desc" } }];
+        orderBy = { orderItems: { _count: "desc" } };
         break;
       case "rating":
-        // If you add rating field later
-        orderBy = [{ createdAt: "desc" }];
+        orderBy = { createdAt: "desc" };
         break;
       default:
-        // relevance or default - multiple fields MUST be in array
-        orderBy = search ? [{ name: "asc" }] : [{ featured: "desc" }, { createdAt: "desc" }];
+        // relevance - prioritize search match
+        orderBy = search ? { name: "asc" } : { featured: "desc", createdAt: "desc" };
     }
 
     // Get total count
     const total = await prisma.product.count({ where });
 
-    // Get products with order count for popularity
+    // Get products
     const products = await prisma.product.findMany({
       where,
       skip,
@@ -86,7 +78,7 @@ export async function GET(request) {
       },
     });
 
-    // Transform products for frontend
+    // Transform products
     const transformedProducts = products.map((product) => {
       const discount = product.comparePrice ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100) : null;
 
@@ -105,8 +97,8 @@ export async function GET(request) {
         images: product.images || [],
         featured: product.featured,
         badge: getBadge(product),
-        rating: null, // Add rating logic if you have reviews
-        reviewCount: 0, // Add review count if you have reviews
+        rating: null,
+        reviewCount: 0,
         orderCount: product._count.orderItems,
       };
     });
@@ -119,14 +111,15 @@ export async function GET(request) {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
+        query: search,
       },
     });
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error searching products:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch products",
+        error: "Failed to search products",
         details: error.message,
       },
       { status: 500 }
@@ -134,7 +127,6 @@ export async function GET(request) {
   }
 }
 
-// Helper function to determine product badge
 function getBadge(product) {
   if (product.featured) return "Featured";
   if (product.category === "premium") return "Premium";

@@ -1,180 +1,177 @@
-"use client";
+// components/home/product-section.jsx
+import prisma from "@/lib/prisma";
+import ProductCard from "@/components/shared/product-card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Sparkles, Package, Leaf, Award, Box } from "lucide-react";
+import Link from "next/link";
 
-import React, { useState } from "react";
-import Image from "next/image";
+// Helper function to get badge
+function getBadge(product) {
+  if (product.featured) return { label: "Featured", color: "bg-yellow-500" };
+  if (product.category === "premium") return { label: "Premium", color: "bg-purple-500" };
+  if (product.category === "organic") return { label: "Organic", color: "bg-green-500" };
+  if (product.category === "traditional") return { label: "Popular", color: "bg-blue-500" };
+  if (product.category === "bulk") return { label: "Wholesale", color: "bg-indigo-500" };
+  if (product.comparePrice && product.comparePrice > product.price) return { label: "Sale", color: "bg-red-500" };
+  return null;
+}
 
-export default function ProductSection() {
-  const [activeProduct, setActiveProduct] = useState(0);
+// Category icons mapping
+const categoryIcons = {
+  all: Sparkles,
+  premium: Award,
+  organic: Leaf,
+  traditional: Package,
+  bulk: Box,
+};
 
-  const products = [
-    {
-      id: 1,
-      name: "Premium Original Tempeh",
-      category: "CLASSIC",
-      description: "Our flagship product made from organic soybeans, fermented using traditional Indonesian methods for authentic taste and maximum nutrition.",
-      image: "/images/tempeh-premium.png",
-      features: ["100% Organic Soybeans", "Traditional Fermentation", "20g Protein per 100g", "Zero Preservatives"],
-      nutrition: { protein: "20g", fiber: "9g", calories: "193", fat: "11g" },
-      certifications: ["Organic", "Non-GMO", "Halal"],
-      bgGradient: "from-amber-50 to-orange-50",
+// Server Component - fetch data directly
+export default async function ProductSection() {
+  // Fetch featured products from database
+  const products = await prisma.product.findMany({
+    where: {
+      status: "ACTIVE",
+      featured: true, // Only featured products for homepage
     },
-    {
-      id: 2,
-      name: "Seasoned Tempeh Strips",
-      category: "READY-TO-COOK",
-      description: "Pre-marinated tempeh strips with traditional Indonesian spices, ready to cook in minutes for busy lifestyles.",
-      image: "/images/tempeh-original.png",
-      features: ["Pre-Marinated", "Traditional Spices", "Quick Cook", "Authentic Flavors"],
-      nutrition: { protein: "18g", fiber: "8g", calories: "210", fat: "12g" },
-      certifications: ["Halal", "Natural"],
-      bgGradient: "from-red-50 to-pink-50",
+    orderBy: [{ featured: "desc" }, { orderItems: { _count: "desc" } }, { createdAt: "desc" }],
+    take: 6, // Show 6 featured products
+    include: {
+      _count: {
+        select: {
+          orderItems: true,
+        },
+      },
     },
-    {
-      id: 3,
-      name: "Tempeh Protein Cubes",
-      category: "FITNESS",
-      description: "High-protein tempeh cubes perfect for fitness enthusiasts and health-conscious consumers seeking plant-based protein.",
-      image: "/images/tempeh-premium.png",
-      features: ["High Protein", "Low Carb", "Fitness Optimized", "Easy Preparation"],
-      nutrition: { protein: "25g", fiber: "7g", calories: "180", fat: "9g" },
-      certifications: ["Organic", "Fitness Approved"],
-      bgGradient: "from-green-50 to-emerald-50",
-    },
-    {
-      id: 4,
-      name: "Multi-Grain Tempeh",
-      category: "PREMIUM",
-      description: "Artisanal blend of soybeans, quinoa, and ancient grains for enhanced nutrition and unique texture experience.",
-      image: "/images/tempeh-original.png",
-      features: ["Ancient Grains Blend", "Enhanced Nutrition", "Unique Texture", "Artisanal Quality"],
-      nutrition: { protein: "22g", fiber: "12g", calories: "205", fat: "10g" },
-      certifications: ["Organic", "Non-GMO", "Artisanal"],
-      bgGradient: "from-purple-50 to-indigo-50",
-    },
+  });
+
+  // If no featured products, get the latest ones
+  const fallbackProducts =
+    products.length === 0
+      ? await prisma.product.findMany({
+          where: { status: "ACTIVE" },
+          orderBy: [{ createdAt: "desc" }],
+          take: 6,
+          include: {
+            _count: {
+              select: {
+                orderItems: true,
+              },
+            },
+          },
+        })
+      : [];
+
+  const displayProducts = products.length > 0 ? products : fallbackProducts;
+
+  // Transform products for display
+  const transformedProducts = displayProducts.map((product) => {
+    const discount = product.comparePrice ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100) : null;
+
+    const badge = getBadge(product);
+
+    return {
+      id: product.id,
+      sku: product.sku,
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      price: Number(product.price),
+      originalPrice: product.comparePrice ? Number(product.comparePrice) : null,
+      discount,
+      stock: product.stock,
+      category: product.category,
+      image: product.images?.[0] || null,
+      images: product.images || [],
+      featured: product.featured,
+      badge: badge?.label || null,
+      badgeColor: badge?.color || "bg-primary",
+      rating: 4.8, // Default rating, replace with actual if available
+      reviews: product._count.orderItems * 2 || 0, // Estimate reviews from orders
+      sold: `${Math.floor(product._count.orderItems / 100) || 1}K+ terjual`,
+      orderCount: product._count.orderItems,
+    };
+  });
+
+  // Get category counts for quick links
+  const categoryCounts = await prisma.product.groupBy({
+    by: ["category"],
+    where: { status: "ACTIVE" },
+    _count: true,
+  });
+
+  // Quick category links
+  const categories = [
+    { id: "all", name: "Semua Produk", icon: Sparkles },
+    { id: "premium", name: "Premium", icon: Award },
+    { id: "organic", name: "Organik", icon: Leaf },
+    { id: "traditional", name: "Tradisional", icon: Package },
+    { id: "bulk", name: "Bulk Order", icon: Box },
   ];
 
-  const currentProduct = products[activeProduct];
-
   return (
-    <section className="py-16 lg:py-24 bg-white">
+    <section className="py-20 bg-linear-to-b from-background to-muted/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <p className="text-sm font-medium tracking-widest uppercase mb-4 text-gray-600">OUR PRODUCTS</p>
-          <h2 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold tracking-wide text-black mb-6 leading-tight">
-            Premium Tempeh
-            <br />
-            <span className="text-primary">Collection</span>
-          </h2>
-          <p className="text-gray-600 text-lg max-w-3xl mx-auto leading-relaxed">Discover our range of premium frozen tempeh products, each crafted with traditional Indonesian methods and modern quality standards.</p>
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <Badge className="mb-4 text-sm px-4 py-1">
+            <Sparkles className="w-3 h-3 mr-1 inline" />
+            Produk Unggulan
+          </Badge>
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4 bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">Tempe Premium Pilihan</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">Dipilih dengan standar kualitas tertinggi untuk kepuasan Anda</p>
         </div>
 
-        {/* Main Product Display */}
-        <div className={`bg-gradient-to-br ${currentProduct.bgGradient} rounded-3xl overflow-hidden shadow-2xl`}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[600px]">
-            {/* Product Image */}
-            <div className="relative order-1 lg:order-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-transparent z-10"></div>
-              <Image src={currentProduct.image} alt={currentProduct.name} fill className="object-cover" quality={90} />
+        {/* Quick Category Links */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
+          {categories.map((category) => {
+            const Icon = category.icon;
+            const count = categoryCounts.find((c) => c.category === category.id)?._count || 0;
 
-              {/* Floating Certifications */}
-              <div className="absolute top-6 left-6 z-20 flex flex-col space-y-2">
-                {currentProduct.certifications.map((cert, index) => (
-                  <span key={index} className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-primary shadow-lg">
-                    ✓ {cert}
-                  </span>
-                ))}
-              </div>
+            return (
+              <Link key={category.id} href={`/products?category=${category.id}`}>
+                <Button variant="outline" size="sm" className="gap-2 hover:bg-primary hover:text-primary-foreground transition-all">
+                  <Icon className="w-4 h-4" />
+                  {category.name}
+                  {category.id !== "all" && count > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                      {count}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+            );
+          })}
+        </div>
 
-              {/* Product Category Badge */}
-              <div className="absolute bottom-6 left-6 z-20">
-                <span className="bg-primary text-white px-4 py-2 rounded-full text-sm font-bold tracking-wide">{currentProduct.category}</span>
-              </div>
-            </div>
-
-            {/* Product Info */}
-            <div className="p-8 lg:p-12 flex flex-col justify-center order-2 lg:order-2">
-              <div className="space-y-8">
-                {/* Product Title */}
-                <div>
-                  <h3 className="font-playfair text-3xl lg:text-4xl font-normal text-black mb-4 leading-tight">{currentProduct.name}</h3>
-                  <p className="text-gray-700 text-lg leading-relaxed">{currentProduct.description}</p>
-                </div>
-
-                {/* Key Features */}
-                <div>
-                  <h4 className="font-medium text-black mb-4">Key Features:</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {currentProduct.features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
-                        <span className="text-sm text-gray-700">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Nutrition Facts */}
-                <div className="bg-white/70 rounded-2xl p-6">
-                  <h4 className="font-medium text-black mb-4 text-center">Nutrition Facts (per 100g)</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <div>
-                      <div className="text-2xl font-bold text-primary mb-1">{currentProduct.nutrition.protein}</div>
-                      <div className="text-xs text-gray-600">Protein</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-primary mb-1">{currentProduct.nutrition.fiber}</div>
-                      <div className="text-xs text-gray-600">Fiber</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-primary mb-1">{currentProduct.nutrition.calories}</div>
-                      <div className="text-xs text-gray-600">Calories</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-primary mb-1">{currentProduct.nutrition.fat}</div>
-                      <div className="text-xs text-gray-600">Fat</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="bg-primary text-white px-8 py-3 text-sm font-medium hover:bg-primary/90 transition-colors rounded-lg flex-1">Request Sample</button>
-                  <button className="border-2 border-primary text-primary px-8 py-3 text-sm font-medium hover:bg-primary hover:text-white transition-colors rounded-lg flex-1">View Details</button>
-                </div>
-              </div>
-            </div>
+        {/* Products Grid */}
+        {transformedProducts.length > 0 ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {transformedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
-        </div>
-
-        {/* Product Grid Thumbnails */}
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {products.map((product, index) => (
-            <button
-              key={product.id}
-              onClick={() => setActiveProduct(index)}
-              className={`relative aspect-square rounded-2xl overflow-hidden transition-all duration-300 ${activeProduct === index ? "ring-4 ring-primary shadow-xl scale-105" : "hover:scale-102 hover:shadow-lg"}`}
-            >
-              <Image src={product.image} alt={product.name} fill className="object-cover" quality={80} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              <div className="absolute bottom-3 left-3 right-3">
-                <div className="text-white text-sm font-medium text-left">{product.name}</div>
-                <div className="text-white/80 text-xs text-left">{product.category}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Bottom CTA */}
-        <div className="text-center mt-16 bg-gray-50 rounded-2xl p-8">
-          <h3 className="font-playfair text-2xl text-black mb-4">Ready to Experience Premium Tempeh?</h3>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">Join thousands of satisfied customers worldwide who have made the switch to sustainable, healthy protein with our premium tempeh collection.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-primary text-white px-8 py-4 text-sm font-medium hover:bg-primary/90 transition-colors rounded-lg">Order Now</button>
-            <button className="border border-gray-300 text-gray-700 px-8 py-4 text-sm font-medium hover:bg-gray-100 transition-colors rounded-lg">Download Catalog</button>
+        ) : (
+          <div className="text-center py-12">
+            <Package className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground text-lg">Belum ada produk tersedia</p>
           </div>
+        )}
+
+        {/* View All Button */}
+        <div className="text-center">
+          <Link href="/products">
+            <Button size="lg" className="gap-2 shadow-lg hover:shadow-xl transition-all">
+              Lihat Semua Produk
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
   );
 }
+
+// Force dynamic rendering to get fresh data
+export const dynamic = "force-dynamic";
+export const revalidate = 300; // Revalidate every 5 minutes
