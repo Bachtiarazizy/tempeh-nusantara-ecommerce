@@ -1,57 +1,100 @@
-// app/api/products/route.js
-
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
+    
+    // Pagination
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "12");
-    const search = searchParams.get("search") || "";
-    const category = searchParams.get("category") || "";
-    const sortBy = searchParams.get("sortBy") || "name";
-    const minPrice = parseFloat(searchParams.get("minPrice") || "0");
-    const maxPrice = parseFloat(searchParams.get("maxPrice") || "100000");
-
     const skip = (page - 1) * limit;
+    
+    // Search
+    const q = searchParams.get("q") || "";
+    
+    // Filters
+    const categories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
+    const minPrice = parseFloat(searchParams.get("minPrice") || "0");
+    const maxPrice = parseFloat(searchParams.get("maxPrice") || "999999999");
+    const inStock = searchParams.get("inStock") === "true";
+    const minRating = parseFloat(searchParams.get("minRating") || "0");
+    const onSale = searchParams.get("onSale") === "true";
+    
+    // Sort
+    const sort = searchParams.get("sort") || "relevance";
 
-    // Build filter conditions
+    // Build where clause
     const where = {
       status: "ACTIVE",
-      ...(search && {
-        OR: [{ name: { contains: search, mode: "insensitive" } }, { description: { contains: search, mode: "insensitive" } }, { category: { contains: search, mode: "insensitive" } }],
+      ...(q && {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+          { sku: { contains: q, mode: "insensitive" } },
+        ],
       }),
-      ...(category && category !== "all" && { category }),
+      ...(categories.length > 0 && {
+        category: {
+          in: categories.map(cat => cat.toLowerCase()),
+          mode: "insensitive",
+        },
+      }),
       price: {
         gte: minPrice,
         lte: maxPrice,
       },
+      ...(inStock && {
+        stock: {
+          gt: 0,
+        },
+      }),
+      ...(minRating > 0 && {
+        rating: {
+          gte: minRating,
+        },
+      }),
+      ...(onSale && {
+        comparePrice: {
+          not: null,
+          gt: prisma.product.fields.price,
+        },
+      }),
     };
 
-    // DEBUG: Log filter conditions
-    console.log("=== PRODUCTS API DEBUG ===");
-    console.log("Filter conditions:", JSON.stringify(where, null, 2));
-    console.log("Search params:", { page, limit, search, category, sortBy, minPrice, maxPrice });
-
-    // Tentukan order by
+    // Build orderBy
     let orderBy = {};
-    switch (sortBy) {
+    switch (sort) {
+      case "popular":
+        orderBy = { sales: "desc" };
+        break;
+      case "best-sellers":
+        orderBy = { sales: "desc" };
+        break;
+      case "newest":
+        orderBy = { createdAt: "desc" };
+        break;
       case "price-low":
         orderBy = { price: "asc" };
         break;
       case "price-high":
         orderBy = { price: "desc" };
         break;
-      case "name":
+      case "rating":
+        orderBy = { rating: "desc" };
+        break;
+      case "relevance":
       default:
-        orderBy = { name: "asc" };
+        orderBy = [
+          { featured: "desc" },
+          { sales: "desc" },
+          { rating: "desc" },
+        ];
         break;
     }
 
     // Get total count
     const total = await prisma.product.count({ where });
-    console.log("Total products found:", total);
 
     // Get products
     const products = await prisma.product.findMany({
@@ -68,64 +111,54 @@ export async function GET(request) {
         price: true,
         comparePrice: true,
         stock: true,
-        weight: true,
-        category: true,
         images: true,
+        category: true,
+        rating: true,
+        reviewCount: true,
+        sales: true,
         featured: true,
-        status: true, // Tambahkan ini untuk debug
-        createdAt: true,
       },
     });
 
-    console.log("Products retrieved:", products.length);
-    if (products.length > 0) {
-      console.log("First product:", products[0]);
-    }
-
-    // Format products untuk frontend
+    // Format products for response
     const formattedProducts = products.map((product) => ({
       id: product.id,
-      sku: product.sku,
       name: product.name,
       slug: product.slug,
-      description: product.description || "",
-      price: parseFloat(product.price),
-      comparePrice: product.comparePrice ? parseFloat(product.comparePrice) : null,
-      stock: product.stock,
-      weight: product.weight,
-      category: product.category,
-      image: product.images[0] || "/images/placeholder-product.png",
+      description: product.description,
+      price: product.price,
+      originalPrice: product.comparePrice,
+      image: product.images[0] || null,
       images: product.images,
-      badge: product.featured ? "Featured" : product.stock < 10 && product.stock > 0 ? "Low Stock" : product.stock === 0 ? "Out of Stock" : null,
-      rating: 4.5,
-      inStock: product.stock > 0,
+      category: product.category,
+      rating: product.rating || 0,
+      reviewCount: product.reviewCount,
+      sales: product.sales,
+      stock: product.stock,
+      badge: product.featured ? "Featured" : null,
+      discount: product.comparePrice
+        ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
+        : null,
     }));
 
-    const response = {
+    return NextResponse.json({
       success: true,
-      data: formattedProducts,
-      pagination: {
+      data: {
+        products: formattedProducts,
+        total,
         page,
         limit,
-        total,
         totalPages: Math.ceil(total / limit),
-        hasMore: page < Math.ceil(total / limit),
+        hasMore: page * limit < total,
       },
-    };
-
-    console.log("Response pagination:", response.pagination);
-    console.log("=== END DEBUG ===\n");
-
-    return NextResponse.json(response);
+    });
   } catch (error) {
-    console.error("❌ Error fetching products:", error);
-    console.error("Error stack:", error.stack);
-
+    console.error("Error fetching products:", error);
     return NextResponse.json(
       {
+        success: false,
         error: "Failed to fetch products",
         details: error.message,
-        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
       },
       { status: 500 }
     );

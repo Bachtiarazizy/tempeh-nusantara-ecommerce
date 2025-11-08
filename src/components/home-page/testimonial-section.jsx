@@ -1,123 +1,75 @@
-"use client";
+import { MapPin, Quote, Star } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { Card, CardContent } from "../ui/card";
 
-import React, { useState } from "react";
-
-export default function TestimonialSections() {
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
-
+export default function TestimonialSection() {
   const testimonials = [
     {
-      id: 1,
-      name: "Sarah Mitchell",
-      position: "Health & Wellness Coach",
-      company: "VitalLife Nutrition",
-      image: "/images/testimonial-sarah.jpg",
+      name: "Ibu Sarah Wijaya",
+      role: "Restoran Owner",
+      avatar: "/avatars/avatar1.jpg",
       rating: 5,
-      quote: "TEMPEH NUSANTARAS PRODUCTS HAVE TRANSFORMED OUR MENU. THE QUALITY AND FLAVOR ARE UNMATCHED!",
+      comment: "Kualitas tempe sangat bagus dan konsisten! Pelanggan saya selalu puas. Sudah order berkali-kali dan tidak pernah mengecewakan.",
+      location: "Jakarta",
     },
     {
-      id: 2,
-      name: "Marcus Chen",
-      position: "Executive Chef",
-      company: "Green Garden Restaurant",
-      image: "/images/testimonial-marcus.jpg",
+      name: "Bapak Ahmad Reza",
+      role: "Distributor",
+      avatar: "/avatars/avatar2.jpg",
       rating: 5,
-      quote: "THE AUTHENTIC TASTE AND PERFECT TEXTURE MAKE THIS THE BEST TEMPEH I'VE EVER WORKED WITH IN MY KITCHEN.",
+      comment: "Sebagai distributor, saya sangat terbantu dengan sistem bulk order mereka. Harga kompetitif dan kualitas export. Recommended!",
+      location: "Surabaya",
     },
     {
-      id: 3,
-      name: "Dr. Elena Rodriguez",
-      position: "Nutritionist",
-      company: "Plant-Based Research Institute",
-      image: "/images/testimonial-elena.jpg",
+      name: "Ms. Jennifer Kim",
+      role: "International Buyer",
+      avatar: "/avatars/avatar3.jpg",
       rating: 5,
-      quote: "FROM A NUTRITIONAL STANDPOINT, THIS TEMPEH EXCEEDS ALL EXPECTATIONS. SUPERIOR QUALITY AND HEALTH BENEFITS.",
-    },
-    {
-      id: 4,
-      name: "James Thompson",
-      position: "Procurement Manager",
-      company: "Whole Foods Market",
-      image: "/images/testimonial-james.jpg",
-      rating: 5,
-      quote: "CONSISTENT QUALITY AND RELIABLE DELIVERY. OUR CUSTOMERS LOVE THIS BRAND AND SALES HAVE INCREASED 40%.",
-    },
-    {
-      id: 5,
-      name: "Aisha Patel",
-      position: "Fitness Influencer",
-      company: "@FitWithAisha",
-      image: "/images/testimonial-aisha.jpg",
-      rating: 5,
-      quote: "PERFECT PROTEIN SOURCE FOR FITNESS ENTHUSIASTS. MY FOLLOWERS LOVE THE MEAL PREP IDEAS WITH THIS TEMPEH.",
+      comment: "Best Indonesian tempeh supplier! Quality is consistent and they handle international shipping very professionally.",
+      location: "Singapore",
     },
   ];
-
-  const nextTestimonial = () => {
-    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-  };
-
-  const prevTestimonial = () => {
-    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  };
-
-  const currentTest = testimonials[currentTestimonial];
-
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Rating Stars */}
-        <div className="flex justify-center mb-8">
-          {[...Array(currentTest.rating)].map((_, i) => (
-            <svg key={i} className="w-6 h-6 text-black fill-current mx-1" viewBox="0 0 24 24">
-              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-            </svg>
-          ))}
+    <section className="py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <Badge className="mb-4">Testimoni</Badge>
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Kata Pelanggan Kami</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">Kepuasan pelanggan adalah prioritas utama kami</p>
         </div>
 
-        {/* Main Content with Side Navigation */}
-        <div className="relative">
-          {/* Previous Button - Left */}
-          <button
-            onClick={prevTestimonial}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-16 w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-600 transition-colors"
-          >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+        <div className="grid md:grid-cols-3 gap-8">
+          {testimonials.map((testimonial, index) => (
+            <Card key={index} className="border-0 shadow-lg">
+              <CardContent className="p-6">
+                <Quote className="w-10 h-10 text-primary/20 mb-4" />
 
-          {/* Next Button - Right */}
-          <button
-            onClick={nextTestimonial}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-16 w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-600 transition-colors"
-          >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+                {/* Rating */}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                  ))}
+                </div>
 
-          {/* Quote */}
-          <div className="text-center mb-12">
-            <p className="text-gray-800 text-lg md:text-xl font-medium leading-relaxed max-w-3xl mx-auto">"{currentTest.quote}"</p>
-          </div>
+                {/* Comment */}
+                <p className="text-muted-foreground mb-6 leading-relaxed">"{testimonial.comment}"</p>
 
-          {/* Customer Info */}
-          <div className="flex items-center justify-center mb-12">
-            <img src={currentTest.image} alt={currentTest.name} className="w-12 h-12 rounded-full object-cover mr-4" />
-            <div className="text-center">
-              <h4 className="text-black font-semibold text-sm">{currentTest.name}</h4>
-              <p className="text-gray-600 text-sm">
-                {currentTest.position}, {currentTest.company}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Dots Indicator - Bottom */}
-        <div className="flex justify-center space-x-2">
-          {testimonials.map((_, index) => (
-            <button key={index} onClick={() => setCurrentTestimonial(index)} className={`w-2 h-2 rounded-full transition-colors ${currentTestimonial === index ? "bg-black" : "bg-gray-300"}`} />
+                {/* Author */}
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-linear-to-br from-primary to-primary/70 rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold">{testimonial.name.charAt(0)}</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold">{testimonial.name}</p>
+                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <MapPin className="w-3 h-3" />
+                      {testimonial.location}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
