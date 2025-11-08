@@ -37,7 +37,6 @@ const getMenuByRole = (role) => {
     ADMIN: {
       title: "Admin Panel",
       subtitle: "Management Dashboard",
-      color: "primary",
       icon: LayoutDashboard,
       items: [
         {
@@ -80,7 +79,6 @@ const getMenuByRole = (role) => {
     AFFILIATE: {
       title: "Affiliate Dashboard",
       subtitle: "Partner Program",
-      color: "blue",
       icon: Share2,
       items: [
         {
@@ -146,13 +144,12 @@ const getMenuByRole = (role) => {
     BUYER: {
       title: "My Account",
       subtitle: "Shopping Dashboard",
-      color: "emerald",
       icon: ShoppingBag,
       items: [
         {
           id: "dashboard",
           label: "Dashboard",
-          href: "/buyer",
+          href: "/buyer/dashboard",
           icon: "layout-dashboard",
           description: "Overview & Activity",
         },
@@ -213,38 +210,6 @@ const getMenuByRole = (role) => {
   return menus[role] || menus.BUYER;
 };
 
-// Get color classes by role
-const getColorClasses = (role, isActive = false) => {
-  const colors = {
-    ADMIN: {
-      gradient: "from-primary to-primary/70",
-      bg: isActive ? "bg-primary" : "hover:bg-primary/10",
-      text: isActive ? "text-primary-foreground" : "text-primary",
-      border: "border-primary/20",
-      ring: "ring-primary/10",
-      shadow: "shadow-primary/20",
-    },
-    AFFILIATE: {
-      gradient: "from-blue-500 to-blue-600",
-      bg: isActive ? "bg-blue-500" : "hover:bg-blue-500/10",
-      text: isActive ? "text-white" : "text-blue-600",
-      border: "border-blue-500/20",
-      ring: "ring-blue-500/10",
-      shadow: "shadow-blue-500/20",
-    },
-    BUYER: {
-      gradient: "from-emerald-500 to-emerald-600",
-      bg: isActive ? "bg-emerald-500" : "hover:bg-emerald-500/10",
-      text: isActive ? "text-white" : "text-emerald-600",
-      border: "border-emerald-500/20",
-      ring: "ring-emerald-500/10",
-      shadow: "shadow-emerald-500/20",
-    },
-  };
-
-  return colors[role] || colors.BUYER;
-};
-
 export const Sidebar = ({ isOpen, setIsOpen }) => {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -252,7 +217,6 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
 
   const user = session?.user;
   const menuConfig = getMenuByRole(user?.role);
-  const colors = getColorClasses(user?.role);
   const HeaderIcon = menuConfig.icon;
 
   const handleLogout = async () => {
@@ -293,10 +257,10 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className={`px-6 py-3 border-b border-border bg-linear-to-r ${colors.bg.replace("hover:", "")} ${colors.bg.includes("bg-") ? "bg-opacity-5" : ""}`}>
+          <div className="px-6 py-3 border-b border-border bg-muted/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 bg-linear-to-br ${colors.gradient} rounded-xl flex items-center justify-center shadow-lg`}>
+                <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                   <HeaderIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -310,15 +274,12 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
             </div>
           </div>
 
-          {/* User Profile Card */}
-
           {/* Navigation Menu */}
           <nav className="flex-1 px-3 py-4 overflow-y-auto">
             <ul className="space-y-1">
               {menuConfig.items.map((item) => {
                 const isActive = pathname === item.href;
                 const IconComponent = getIconComponent(item.icon);
-                const itemColors = getColorClasses(user.role, isActive);
 
                 return (
                   <li key={item.id}>
@@ -329,25 +290,25 @@ export const Sidebar = ({ isOpen, setIsOpen }) => {
                       }}
                       className={`w-full flex items-start gap-3 px-3 py-3 text-left rounded-xl
                         transition-all duration-200 group relative overflow-hidden
-                        ${isActive ? `${itemColors.bg} ${itemColors.text} shadow-lg ${itemColors.shadow}` : `text-foreground ${itemColors.bg}`}`}
+                        ${isActive ? "bg-blue-500/10 text-blue-600" : "text-foreground hover:bg-blue-500/10"}`}
                     >
                       {/* Active indicator */}
-                      {isActive && <div className={`absolute left-0 top-0 bottom-0 w-1 ${isActive && user.role === "ADMIN" ? "bg-primary-foreground" : "bg-white"} rounded-r-full`} />}
+                      {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full" />}
 
-                      <div className={`p-2 rounded-lg transition-all ${isActive ? (user.role === "ADMIN" ? "bg-primary-foreground/20" : "bg-white/20") : `${itemColors.bg.replace("hover:", "")} bg-opacity-10`}`}>
-                        <IconComponent className="w-5 h-5" />
+                      <div className={`p-2 rounded-lg transition-all ${isActive ? "bg-blue-500/20" : "bg-muted/50 group-hover:bg-blue-500/20"}`}>
+                        <IconComponent className={`w-5 h-5 ${isActive ? "text-blue-600" : ""}`} />
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">{item.label}</span>
+                          <span className={`font-medium text-sm ${isActive ? "text-blue-600" : ""}`}>{item.label}</span>
                           {item.badge && (
-                            <Badge variant={isActive ? "secondary" : "outline"} className="text-xs px-1.5 py-0 h-5">
+                            <Badge variant={isActive ? "default" : "outline"} className={`text-xs px-1.5 py-0 h-5 ${isActive ? "bg-blue-500 text-white" : ""}`}>
                               {item.badge}
                             </Badge>
                           )}
                         </div>
-                        <p className={`text-xs mt-0.5 ${isActive ? (user.role === "ADMIN" ? "text-primary-foreground/70" : "text-white/70") : "text-muted-foreground"}`}>{item.description}</p>
+                        <p className={`text-xs mt-0.5 ${isActive ? "text-blue-600/70" : "text-muted-foreground"}`}>{item.description}</p>
                       </div>
                     </button>
                   </li>
